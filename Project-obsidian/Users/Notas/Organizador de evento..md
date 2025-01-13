@@ -1,0 +1,1 @@
+Cada usuário terá uma nota, esta que é dada apenas para quem organizar eventos
