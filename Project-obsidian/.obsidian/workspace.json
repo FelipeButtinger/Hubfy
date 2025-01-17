@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Users/users.mysql.md",
+                "file": "Eventos/user_event.mysql.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "users.mysql"
+              "title": "user_event.mysql"
             }
           }
         ]
@@ -165,8 +165,8 @@
   "active": "4c1fdc6996ee3e59",
   "lastOpenFiles": [
     "Eventos/events.mysql.md",
-    "Eventos/Eventos.md",
     "Users/users.mysql.md",
+    "Eventos/Eventos.md",
     "Users/Honras/Sistema de honras..md",
     "Users/Honras/honras.mysql.md",
     "Users/Notas/notas.mysql.md",

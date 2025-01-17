@@ -49,12 +49,6 @@ app.post('/register', async (req, res) => {
 
 app.post('/groupRegister', async (req, res) => {
   const { name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number} = req.body;
-
-
-  // Verifica se o usuário já existe
-  
-
-    // Insere o novo usuário no banco de dados
     db.query('INSERT INTO events (name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number], (err, result) => {
       if (err) throw err;
       res.send('Evento registrado com sucesso');
@@ -62,9 +56,14 @@ app.post('/groupRegister', async (req, res) => {
   
 });
 
-
-
-
+app.post('/participants register', async (req, res) => {
+  const { event_id, user_id} = req.body;
+    db.query('INSERT INTO events (name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number], (err, result) => {
+      if (err) throw err;
+      res.send('Evento registrado com sucesso');
+    });
+  
+});
 
 
 // Rota para login de usuários

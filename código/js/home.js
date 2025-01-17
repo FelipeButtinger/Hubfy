@@ -1,3 +1,4 @@
+let selectedEvent =0;
 document.addEventListener('DOMContentLoaded', async () => {
   let eventIds = [];
   const token = localStorage.getItem('token'); 
@@ -45,25 +46,108 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     console.log(eventIds);
     
-    for (const eventId of eventIds) { // Corrigido para iterar sobre os valores do array
-      fetch(`http://localhost:3000/eventId?id=${eventId}`, {
-          method: 'GET',
-      })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error(`Erro: ${response.statusText}`);
-              }
-              return response.json();
-          })
-          .then(eventData => {
-              console.log(eventData); // Dados do evento retornados pelo servidor
-              // Manipula os dados, por exemplo, adicioná-los ao HTML
-              const div = document.createElement('div');
-              div.textContent = `Evento: ${eventData.name}, Tipo: ${eventData.event_type}, Participantes: ${eventData.participants}, Data: ${eventData.event_date}, Hora: ${eventData.event_time}, Endereço: ${eventData.CEP}`;
-              document.body.appendChild(div); // Adiciona ao corpo da página
-          })
-          .catch(error => {
-              console.error('Erro ao buscar os dados do evento:', error.message);
-          });
-  }
+    const main = document.querySelector('main'); // Seleciona o elemento <main>
+if (!main) {
+    console.error('Elemento <main> não encontrado no HTML!');
+}
+
+async function fetchEventData(eventId) {
+    try {
+        const eventResponse = await fetch(`http://localhost:3000/eventId?id=${eventId}`);
+        if (!eventResponse.ok) {
+            throw new Error(`Erro: ${eventResponse.statusText}`);
+        }
+        const eventData = await eventResponse.json();
+
+        const today = new Date().toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
+        if (eventData.event_date < today) {
+            console.warn(`Evento "${eventData.name}" não será adicionado, pois a data (${eventData.event_date}) é anterior à data atual.`);
+            return; // Não adiciona o evento
+        }
+
+        const cepResponse = await fetch(`https://viacep.com.br/ws/${eventData.CEP}/json/`);
+        if (!cepResponse.ok) {
+            throw new Error(`Erro ao buscar CEP: ${cepResponse.statusText}`);
+        }
+        const cepData = await cepResponse.json();
+
+        // Cria um elemento HTML com os dados do evento e do endereço
+        const div = document.createElement('div');
+div.classList.add('eventCard');
+const data = eventData.event_date.slice(0, -14);
+const partes = data.split("-")
+// Adiciona elementos HTML para cada parte da informação
+div.innerHTML = `
+    <h3>${eventData.name}</h3>
+    <div class="divide">
+        <p><strong>Tipo:</strong> ${eventData.event_type}</p>
+        <p><strong>Participantes:</strong> ${eventData.participants}</p>
+    </div>
+    <div class="divide">
+        <p><strong>Data:</strong> ${partes[2]+"/"+partes[1]+"/"+partes[0]}</p>
+        <p><strong>Hora:</strong> ${eventData.event_time}</p>
+    </div>
+    <p><strong>Endereço:</strong> ${cepData.bairro}, ${cepData.localidade} - ${cepData.uf}</p>
+    <button value="${eventId}" onclick="entrarEvento(this)">teste</button>
+`;
+
+        main.appendChild(div); // Adiciona ao elemento <main>
+    } catch (error) {
+        console.error(`Erro ao buscar os dados do evento ${eventId}:`, error.message);
+    }
+}
+
+async function fetchAllEvents(eventIds) {
+    for (const eventId of eventIds) {
+        await fetchEventData(eventId);
+    }
+}
+
+// Substitua 'eventIds' pelo array real com os IDs dos eventos
+fetchAllEvents(eventIds)
+  
 });
+
+async function entrarEvento(button) {
+
+  document.getElementById('joinEventLock').style.display = "block";
+  document.getElementById('preencher').textContent = selectedEvent;
+  
+  selectedEvent=button.value
+    console.log(selectedEvent);
+    document.getElementById('preencher').textContent = selectedEvent;
+
+    try {
+        const eventResponse = await fetch(`http://localhost:3000/eventId?id=${selectedEvent}`);
+        if (!eventResponse.ok) {
+            throw new Error(`Erro: ${eventResponse.statusText}`);
+        }
+        const eventData = await eventResponse.json();
+    
+        const cepResponse = await fetch(`https://viacep.com.br/ws/${eventData.CEP}/json/`);
+        if (!cepResponse.ok) {
+            throw new Error(`Erro ao buscar CEP: ${cepResponse.statusText}`);
+        }
+        const cepData = await cepResponse.json();
+        
+
+        document.getElementById('description').textContent = eventData.description;
+        document.getElementById('type').textContent = eventData.event_type;
+        const data = eventData.event_date.slice(0, -14);
+        const partes = data.split("-")
+
+        document.getElementById('dataHora').textContent = partes[2]+"/"+partes[1]+"/"+partes[0]+" - "+eventData.event_time.slice(0, -3);
+        document.getElementById('local').textContent = cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf;
+        document.getElementById('contact').href = `https://api.whatsapp.com/send?phone=55${eventData.phone_number.replace(/[()]/g, "").trim()}`;
+
+        
+    } catch (error) {
+        console.error(`Erro ao buscar os dados do evento ${selectedEvent}:`, error.message);
+    }
+}
+
+function fecharEvento(){
+  document.getElementById('joinEventLock').style.display = "none";
+  
+}
+
