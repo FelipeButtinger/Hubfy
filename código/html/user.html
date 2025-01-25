@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/user.css">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        
+    </header>
+    <aside>
+        
+    </aside>
+    <main>
+        <div id="joined">
+            <div class="active">
+            
+
+                <div class="activeCard" id="activeCard0">
+                    <h3 id="activeName0">${eventData.name}</h3>
+                    <div class="divide">
+                        <p  id="activeType0"><strong>Tipo:</strong> Geek</p>
+                        <p id="activeParticipants0"><strong>Participantes:</strong> 2/5</p>
+                    </div>
+                    <div class="divide">
+                        <p id="activeDate0"><strong>Data:</strong> 22/01/2025</p>
+                        <p id="activeTime0"><strong>Hora:</strong> 10:20</p>
+                    </div>
+                    <p id="activeAddress0"><strong>Endereço:</strong> São Leopoldo - campina - RS</p>
+                    <button id="activeButton0" value="${eventId}" onclick="entrarCardEvento(this)">teste</button>
+                </div>
+
+                <div class="activeCard" id="activeCard1">
+                    <h3 id="activeName1">${eventData.name}</h3>
+                    <div class="divide">
+                        <p  id="activeType1"><strong>Tipo:</strong> Geek</p>
+                        <p id="activeParticipants1"><strong>Participantes:</strong> 2/5</p>
+                    </div>
+                    <div class="divide">
+                        <p id="activeDate1"><strong>Data:</strong> 22/01/2025</p>
+                        <p id="activeTime1"><strong>Hora:</strong> 10:20</p>
+                    </div>
+                    <p id="activeAddress1"><strong>Endereço:</strong> São Leopoldo - campina - RS</p>
+                    <button id="activeButton1" value="${eventId}" onclick="entrarCardEvento(this)">teste</button>
+                </div>
+
+                <div class="activeCard" id="activeCard2">
+                    <h3 id="activeName2">${eventData.name}</h3>
+                    <div class="divide">
+                        <p  id="activeType2"><strong>Tipo:</strong> Geek</p>
+                        <p id="activeParticipants0"><strong>Participantes:</strong> 2/5</p>
+                    </div>
+                    <div class="divide">
+                        <p id="activeDate2"><strong>Data:</strong> 22/01/2025</p>
+                        <p id="activeTime2"><strong>Hora:</strong> 10:20</p>
+                    </div>
+                    <p id="activeAddress2"><strong>Endereço:</strong> São Leopoldo - campina - RS</p>
+                    <button id="activeButton2" value="${eventId}" onclick="entrarCardEvento(this)">teste</button>
+                </div>
+                <a href="./eventCreation.html"  id="createIcon0">
+                    <img src="../src/create.png" alt="Sinal de Mais">
+                </a>
+                <a href="./eventCreation.html"  id="createIcon1">
+                    <img src="../src/create.png" alt="Sinal de Mais">
+                </a>
+                <a href="./eventCreation.html"  id="createIcon2">
+                    <img src="../src/create.png" alt="Sinal de Mais">
+                </a><!--Estes elementos aparecem para cada espaço que o usuário possui para criar um grupo-->
+            </div>
+            <div class="past">
+                <div id="topHalf" class="halfs">
+                    <div class="pastCard" id="pastCard0">
+
+                    </div>
+                    <div class="pastCard" id="pastCard1">
+
+                    </div>
+                    <div class="pastCard" id="pastCard2">
+
+                    </div>
+                </div>
+                <div id="bottomHalf" class="halfs">
+                    <div class="pastCard" id="pastCard3">
+
+                    </div>
+                    <div class="pastCard" id="pastCard4">
+
+                    </div>
+                    <div class="pastCard" id="pastCard5">
+
+                    </div>
+                </div>
+            </div>
+            
+            
+        </div>
+        <div id="mainFooter">
+            <div class="fill"></div><div id="pageSwitch">
+                <button class="switchers" id="back" onclick=switchPage(0) value=0></button>
+                <h2>OI</h2>
+                <button class="switchers" id="next" onclick=switchPage(1) value="1"></button>
+            </div><div class="fill"></div>
+        </div>
+    </main>
+</body>
+<script src="../js/user.js"></script>
+</html>

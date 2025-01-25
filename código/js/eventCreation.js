@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const phone_number = document.getElementById('phone_number').value;
     
 
-        const response = await fetch('http://localhost:3000/groupRegister', {
+        const response = await fetch('http://localhost:3000/eventRegister', {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
 

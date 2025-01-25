@@ -47,7 +47,7 @@ app.post('/register', async (req, res) => {
   });
 });
 
-app.post('/groupRegister', async (req, res) => {
+app.post('/eventRegister', async (req, res) => {
   const { name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number} = req.body;
     db.query('INSERT INTO events (name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number], (err, result) => {
       if (err) throw err;
@@ -56,14 +56,14 @@ app.post('/groupRegister', async (req, res) => {
   
 });
 
-app.post('/participants register', async (req, res) => {
-  const { event_id, user_id} = req.body;
-    db.query('INSERT INTO events (name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number], (err, result) => {
+app.post('/participantsRegister', async (req, res) => {
+  const { event_id, participant_id} = req.body;
+    db.query('INSERT INTO event_participants (event_id, user_id) VALUES (?, ?)', [event_id, participant_id], (err, result) => {
       if (err) throw err;
-      res.send('Evento registrado com sucesso');
+      res.send('Relação registrada com sucesso');
     });
   
-});
+});//esta rota cria a relação entre um participante com o grupo que ele entrou
 
 
 // Rota para login de usuários
@@ -125,9 +125,9 @@ app.get('/events/ids', (req, res) => {
     }
 
     const eventIds = results.map(event => event.id); // Mapeia apenas os IDs dos resultados
-    res.json(eventIds); // Retorna os IDs como uma array para que os use
+    res.json(eventIds); 
   });
-});
+});// Retorna os IDs como uma array para que os use
 
 
 app.get('/eventId', (req, res) => {//retorna algumas informações com o id fornecido
@@ -151,6 +151,63 @@ app.get('/eventId', (req, res) => {//retorna algumas informações com o id forn
 
     // Retorna o primeiro resultado (espera-se que o ID seja único)
     res.json(results[0]);
+  });
+});
+app.get('/participants', async (req, res)=>{
+  const { groupId } = req.query;
+
+  if (!groupId){
+    return res.status(400).json({ error: 'Id go grupo necessário' });
+  }
+
+  db.query('SELECT COUNT(user_id) AS total_participants FROM event_participants WHERE event_id = ?', [groupId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    res.json({ participants: result[0] });
+  });
+})
+app.get("/userEvents", async (req, res) => {
+  const { userId } = req.query;
+
+  // Consulta para buscar eventos criados pelo usuário
+  const queryCreatedEvents = `
+    SELECT * 
+    FROM events 
+    WHERE organizer_id = ?`;
+
+  // Consulta para buscar eventos em que o usuário está cadastrado
+  const queryMemberEvents = `
+    SELECT e.* 
+    FROM event_participants ue
+    INNER JOIN events e ON ue.event_id = e.id
+    WHERE ue.user_id = ?`;
+
+  // Executar as consultas em paralelo
+  db.query(queryCreatedEvents, [userId], (err, createdEvents) => {
+    if (err) {
+      console.error("Erro ao buscar eventos criados:", err);
+      return res.status(500).json({ error: "Erro ao buscar eventos criados." });
+    }
+
+    db.query(queryMemberEvents, [userId], (err, memberEvents) => {
+      if (err) {
+        console.error("Erro ao buscar eventos do usuário:", err);
+        return res.status(500).json({ error: "Erro ao buscar eventos do usuário." });
+      }
+
+      // Combinar os resultados
+      const allEvents = [...createdEvents, ...memberEvents];
+
+      res.status(200).json({
+allEvents
+      });
+    });
   });
 });
 app.get('/userId', async (req, res) => { //retorna os dados do usuário como um json

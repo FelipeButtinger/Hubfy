@@ -1,5 +1,6 @@
 let selectedEvent =0;
 document.addEventListener('DOMContentLoaded', async () => {
+    
   let eventIds = [];
   const token = localStorage.getItem('token'); 
   if (!token) {
@@ -88,7 +89,7 @@ div.innerHTML = `
         <p><strong>Hora:</strong> ${eventData.event_time}</p>
     </div>
     <p><strong>Endereço:</strong> ${cepData.bairro}, ${cepData.localidade} - ${cepData.uf}</p>
-    <button value="${eventId}" onclick="entrarEvento(this)">teste</button>
+    <button value="${eventId}" onclick="entrarCardEvento(this)">teste</button>
 `;
 
         main.appendChild(div); // Adiciona ao elemento <main>
@@ -106,9 +107,23 @@ async function fetchAllEvents(eventIds) {
 // Substitua 'eventIds' pelo array real com os IDs dos eventos
 fetchAllEvents(eventIds)
   
-});
 
-async function entrarEvento(button) {
+});
+async function entrarEvento(){
+    eventId = document.getElementById('userEvent').value
+    participantId = userData.id
+
+    console.log("teste "+ participantId + selectedEvent)
+    const response = await fetch('http://localhost:3000/participantsRegister', {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+
+        body: JSON.stringify({event_id: selectedEvent, participant_id: participantId })
+
+    });
+    
+  }
+async function entrarCardEvento(button) {
 
   document.getElementById('joinEventLock').style.display = "block";
   document.getElementById('preencher').textContent = selectedEvent;
@@ -130,7 +145,13 @@ async function entrarEvento(button) {
         }
         const cepData = await cepResponse.json();
         
-
+        const participantsResponse = await fetch(`http://localhost:3000/participants?groupId=${selectedEvent}`);
+        if (!eventResponse.ok) {
+            throw new Error(`Erro: ${eventResponse.statusText}`);
+        }
+        participantsData = await participantsResponse.json();
+        console.log(participantsData.participants.total_participants+1)
+        
         document.getElementById('description').textContent = eventData.description;
         document.getElementById('type').textContent = eventData.event_type;
         const data = eventData.event_date.slice(0, -14);
@@ -139,7 +160,8 @@ async function entrarEvento(button) {
         document.getElementById('dataHora').textContent = partes[2]+"/"+partes[1]+"/"+partes[0]+" - "+eventData.event_time.slice(0, -3);
         document.getElementById('local').textContent = cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf;
         document.getElementById('contact').href = `https://api.whatsapp.com/send?phone=55${eventData.phone_number.replace(/[()]/g, "").trim()}`;
-
+        document.getElementById('participants').textContent = participantsData.participants.total_participants+1+"/"+eventData.participants
+        document.getElementById('userEvent').value = selectedEvent;
         
     } catch (error) {
         console.error(`Erro ao buscar os dados do evento ${selectedEvent}:`, error.message);
@@ -150,4 +172,5 @@ function fecharEvento(){
   document.getElementById('joinEventLock').style.display = "none";
   
 }
+
 
