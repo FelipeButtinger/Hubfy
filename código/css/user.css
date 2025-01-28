@@ -95,4 +95,56 @@ height: 100%;
     width: 100px;
 }
 
+button img{
+    height: 100%;
+    width: 100;
+}
+#leftArrow{
+    transform: rotate(180deg);
+}
+#backgroundLocker{
+    display: none;
+    position: absolute;
+    height: 100dvh;
+    width: 100dvw;
 
+
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+#card{
+    width: 35dvw;
+    height: 80dvh;
+    background-color: rgb(112, 224, 224);
+
+    
+}
+#rate{
+    display: flex;
+    flex-direction: column;
+
+}
+#rateOrganizer{
+    height: 20dvh;
+    width: 25dvw;
+    background-color:darkgreen;
+}
+#participantsHonor{
+    height: 80dvh;
+    width: 25dvw;
+    background-color: darkgoldenrod;
+}
+.star {
+    width:  3dvw;
+    cursor: pointer;
+    
+}
+#rateOrganizer button{
+    background-color: transparent; 
+  border: none; 
+  outline: none; 
+}
+#description{
+    width: 90%;
+    font-size: 20px;
+}

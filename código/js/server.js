@@ -169,9 +169,32 @@ app.get('/participants', async (req, res)=>{
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    res.json({ participants: result[0] });
+    res.json({ participants: result[0].total_participants });
   });
 })
+
+app.get('/participantsInfo', async (req, res) => {
+  const { groupId } = req.query;
+
+  if (!groupId) {
+    return res.status(400).json({ error: 'Id do grupo necessário' });
+  }
+
+  db.query(
+    'SELECT u.id, u.name FROM event_participants ep JOIN users u ON ep.user_id = u.id WHERE ep.event_id = ?;',
+    [groupId],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro no servidor' });
+      }
+
+      // Retorna lista vazia se não houver participantes
+      res.status(200).json({ result: result || [] });
+    }
+  );
+});
+
+
 app.get("/userEvents", async (req, res) => {
   const { userId } = req.query;
 
@@ -210,28 +233,84 @@ allEvents
     });
   });
 });
-app.get('/userId', async (req, res) => { //retorna os dados do usuário como um json
-  const { name } = req.query; 
-  
-  if (!name) {
-    return res.status(400).json({ error: 'Username é obrigatório' });
+app.get('/userId', (req, res) => {//retorna algumas informações com o id fornecido
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ error: 'ID do usuário não fornecido' });
   }
 
-  db.query('SELECT * FROM users WHERE username = ?', [username], (err, result) => {
+  const query = 'SELECT * FROM users WHERE id = ?';
+
+  db.query(query, [id], (err, results) => {
     if (err) {
+      console.error('Erro no servidor:', err);
       return res.status(500).json({ error: 'Erro no servidor' });
     }
 
-    if (result.length === 0) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Evento não encontrado' });
     }
 
-    res.json({ id: result[0] });
+    
+    res.json(results[0]);
   });
 });
 
+app.delete('/leaveEvent', async (req, res) => {
+  const { user_id, event_id } = req.body;
 
+  if (!user_id || !event_id) {
+    return res.status(400).json({ error: 'user_id e event_id são obrigatórios' });
+  }
 
+  try {
+    const [result] = await db.promise().query(
+      'DELETE FROM event_participants WHERE user_id = ? AND event_id = ?',
+      [user_id, event_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Registro não encontrado' });
+    }
+
+    res.json({ message: 'Registro deletado com sucesso' });
+  } catch (err) {
+    console.error('Erro no servidor:', err);
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
+});
+
+app.put('/editEvent', authenticateToken, async (req, res) => {
+  const { newName, newDescription, newEvent_Type, newParticipants, newEvent_Date, newEvent_Time, newCep, newPhoneNumber, event_id } = req.body;  // Obtém o novo email e a nova senha
+  
+
+  // Atualiza o email e senha do usuário
+  db.query('UPDATE events SET name = ?, description = ?, event_type = ?, participants = ?, event_date = ?, event_time = ?, CEP = ?, phone_number = ? WHERE id = ?', [newName, newDescription, newEvent_Type, newParticipants, newEvent_Date, newEvent_Time, newCep, newPhoneNumber, event_id], (err, result) => {
+    if (err) throw err;
+
+    // Verifica se a atualização foi bem-sucedida
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Evento não encontrado');
+    }
+
+    res.send('Evento atualizado com sucesso');
+  });
+});
+
+app.delete('/event', (req, res) => {
+  
+  const { eventId } = req.body;
+  db.query('DELETE FROM events WHERE id = ?', [eventId], (err, result) => {
+    if (err) throw err;
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('evento não encontrado');
+    }
+
+    res.send('evento deletado com sucesso');
+  });
+});
 // Inicia o servidor na porta 3000
 app.listen(3000, () => {
   console.log('Servidor rodando na porta 3000');

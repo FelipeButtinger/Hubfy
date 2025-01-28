@@ -11,14 +11,12 @@
             "id": "4c1fdc6996ee3e59",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Eventos/user_event.mysql.md",
-                "mode": "source",
-                "source": false
+                "file": "Users/Honras/Sistema_de_honras.png"
               },
-              "icon": "lucide-file",
-              "title": "user_event.mysql"
+              "icon": "lucide-image",
+              "title": "Sistema_de_honras"
             }
           }
         ]
@@ -164,6 +162,7 @@
   },
   "active": "4c1fdc6996ee3e59",
   "lastOpenFiles": [
+    "Eventos/user_event.mysql.md",
     "Eventos/events.mysql.md",
     "Users/users.mysql.md",
     "Eventos/Eventos.md",
@@ -172,7 +171,6 @@
     "Users/Notas/notas.mysql.md",
     "Users/Usuários.md",
     "Untitled 1.canvas",
-    "Eventos/user_event.mysql.md",
     "Users/Honras/Sistema_de_honras.png",
     "Eventos",
     "Project.md",

@@ -121,7 +121,7 @@ async function entrarEvento(){
         body: JSON.stringify({event_id: selectedEvent, participant_id: participantId })
 
     });
-    
+    location.reload()
   }
 async function entrarCardEvento(button) {
 
@@ -145,12 +145,12 @@ async function entrarCardEvento(button) {
         }
         const cepData = await cepResponse.json();
         
-        const participantsResponse = await fetch(`http://localhost:3000/participants?groupId=${selectedEvent}`);
+        const participantsResponse = await fetch(`http://localhost:3000/participantsQuantity?groupId=${selectedEvent}`);
         if (!eventResponse.ok) {
             throw new Error(`Erro: ${eventResponse.statusText}`);
         }
         participantsData = await participantsResponse.json();
-        console.log(participantsData.participants.total_participants+1)
+        console.log(participantsData.participants)
         
         document.getElementById('description').textContent = eventData.description;
         document.getElementById('type').textContent = eventData.event_type;
@@ -160,7 +160,7 @@ async function entrarCardEvento(button) {
         document.getElementById('dataHora').textContent = partes[2]+"/"+partes[1]+"/"+partes[0]+" - "+eventData.event_time.slice(0, -3);
         document.getElementById('local').textContent = cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf;
         document.getElementById('contact').href = `https://api.whatsapp.com/send?phone=55${eventData.phone_number.replace(/[()]/g, "").trim()}`;
-        document.getElementById('participants').textContent = participantsData.participants.total_participants+1+"/"+eventData.participants
+        document.getElementById('participants').textContent = participantsData.participants+"/"+eventData.participants
         document.getElementById('userEvent').value = selectedEvent;
         
     } catch (error) {
