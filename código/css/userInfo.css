@@ -1,0 +1,73 @@
+
+body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}header{
+    width: 100dvw;
+    height: 10dvh;
+    background-color: rgb(230, 230, 247);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#headerDiv{
+    width: 80dvw;
+    height: 10dvh;
+
+    background-color: rgb(247, 189, 189);
+}
+main{
+    display: flex;
+    justify-content: center;
+    width: 100dvw;
+    height: 90dvh;
+}
+#mainDiv{
+    width: 80dvw;
+    height: 90dvh;
+
+    background-color: aquamarine;
+}
+#userInfo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80dvw;
+    height: 25dvh;
+    background-color: rgb(107, 126, 119);
+}
+#imgSection{
+    display: flex;
+}
+.fill{
+    display: flex;
+    justify-content:start;
+    align-items: center;
+    width: 30dvw;
+    height: 15dvh;
+}.fill img{
+    height: 10dvh;
+}
+#imgDiv{display: flex;
+    
+    justify-content: center;
+    width: 20dvw;
+    height: 15dvh;
+    
+}#imgDiv img{
+    height: 15dvh;
+    border-radius: 50%;
+}
+#honors{
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    width: 20dvw;
+    height: 10dvh;
+    ;
+}
+.honorImg{
+height: 10dvh;
+}

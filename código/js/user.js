@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <p id="activeTime0"><strong>Hora:</strong> ${activeEvents[index].event_time.slice(0, -3)}</p>
                     </div>
                     <p id="activeAddress0"><strong>Endereço:</strong> ${cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf}</p>
-                    <button id="activeButton${index}" value="${[index,activeEvents[index].organizer_id ]}" onclick="entrarCardEvento(this)">${label}</button>
+                    <button id="activeButton${index}" value='${JSON.stringify([index, activeEvents[index].organizer_id])}' onclick="entrarCardEvento(this)">${label}</button>
     `;
     document.getElementById(`activeCard${index}`).style.display = "flex";
     document.getElementById(`createIcon${index}`).style.display = "none"
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <p id="activeTime0"><strong>Hora:</strong> ${pastEvents[index2].event_time.slice(0, -3)}</p>
                             </div>
                             <p id="activeAddress0"><strong>Endereço:</strong> ${cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf}</p>
-                            <button id="pastButton${index2}" value="${[index2, pastEvents[index2].organizer_id]}" onclick="entrarCardEvento(this)">ver</button>
+                            <button id="pastButton${index2}" value='${JSON.stringify([index2, pastEvents[index2].organizer_id])}' onclick="entrarCardEvento(this)">ver</button>
             `;
             
             }
@@ -165,108 +165,137 @@ document.addEventListener('DOMContentLoaded', async () => {
 }
 
 function entrarCardEvento(button){
-    document.getElementById('backgroundLocker').style.display = "flex"
+    const values = JSON.parse(button.value); // Converte a string JSON de volta para array
+    const index = values[0]; // Pega o índice correto
+
+    document.getElementById('backgroundLocker').style.display = "flex";
     
-    if(button.id.slice(0,-1) == 'activeButton'){
-        document.getElementById('rateOrganizer').style.display = "none"
-        document.getElementById('participantsHonor').style.display = "none"
-        console.log(button.value[0], activeEvents[button.value[0]])//button.value[0] possui o index do array onde o evento está
-        document.getElementById('backgroundLocker').style.justifyContent = "center"
+    if(button.id.startsWith('activeButton')){
+        document.getElementById('rateOrganizer').style.display = "none";
+        document.getElementById('participantsHonor').style.display = "none";
+        document.getElementById('backgroundLocker').style.justifyContent = "center";
 
-        renderActiveCard(button)
-    }else{
-
-
-        renderPastCard(button);
+        renderActiveCard(button);
+    } else {
+        renderPastCard(index, values[1]); // Passa o índice correto e o organizer_id
     }
 }
-async function renderPastCard(button){
-    if(button.value[2] != userData.id){//se o usuário for dono do evento
-        document.getElementById('rateOrganizer').style.display = "flex"
-    }else{
-        document.getElementById('rateOrganizer').style.display = "none"
+async function renderPastCard(index, organizerId) {
+    console.log("Índice recebido:", index);
+    console.log("Evento encontrado:", pastEvents[index]);
+
+    if (!pastEvents[index]) {
+        console.error(`Erro: Não existe pastEvents[${index}]`);
+        return;
     }
-    
-    document.getElementById('participantsHonor').style.display = "flex"
 
-    document.getElementById('backgroundLocker').style.justifyContent = "space-evenly"
-
-    let index = button.value[0];
-
-    const participantsData2 = await participantsInfo(pastEvents[index].id)
-    console.log(participantsData2.result)
-    fillHonorCards(participantsData2.result, );
-       
-    console.log(button.value[0], pastEvents[index]);
-        const cepData = await cepSearch(pastEvents[index].CEP);
-    
-        const data = pastEvents[index].event_date.slice(0, -14);
-            const partes = data.split("-")
-    
-            const participantsData = await participantsQuantity(pastEvents[index].id)
-        if(button.value[2] != userData.id){//Se o if do usuário for diferente do de quem criou o evento
-        }
-            
-    
-            const userIdResponse = await fetch(`http://localhost:3000/userId?id=${button.value[2]}`);
-            if (!userIdResponse.ok) {
-                throw new Error(`Erro: ${userIdResponse.statusText}`);
+    // Exibir elementos corretos
+    if(organizerId != userData.id){
+        let exists = false;
+        document.getElementById('rateOrganizer').style.display = "flex";
+        document.getElementById('stars').value = organizerId;
+        const ratingsResponse = await fetch(`http://localhost:3000/getRatings?userId=${organizerId}`, {
+            method: 'GET'
+        });
+        
+        let ratingsResult = await ratingsResponse.json();
+        for(let i = 0;i<ratingsResult.ratings.length;i++){
+            if(ratingsResult.ratings[i].rating_user_id!=userData.id){
+                continue;
+            }else{
+                changeRating(ratingsResult.ratings[i].rating_value)
+                document.getElementById('comment').value = ratingsResult.ratings[i].comment
             }
-            const organizerData = await userIdResponse.json();//usado para resgatar o nome do criador do grupo
+            
+        }
     
-            document.getElementById(`card`).innerHTML = `
-            <h3 id="activeName0">${pastEvents[index].name}</h3>
-                        <a>${organizerData.name}</a>
-                        <p id="description">${pastEvents[index].description}</p>
-                        <p>${pastEvents[index].event_type}</p>
-                        <div class="divide">
-                            <p id="activeDate0"><strong>Data:</strong> ${partes[2]+"/"+partes[1]+"/"+partes[0]}</p>
-                            <p id="activeTime0"><strong>Hora:</strong> ${pastEvents[index].event_time.slice(0, -3)}</p>
-                        </div>
-                        <p>participantes: ${participantsData.participants}/${pastEvents[index].participants}</p>
-                        <a href = "https://api.whatsapp.com/send?phone=55${pastEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
-                        <p id="activeAddress0"><strong>Endereço:</strong> ${cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf}</p>
-                        
-        `;
-            console.log('você não é o dono deste evento')
-        
+    }else{
+        document.getElementById('rateOrganizer').style.display = "none";
     }
-async function renderActiveCard(button){
-    let index = button.value[0];
+
+    document.getElementById('participantsHonor').style.display = "flex";
+    document.getElementById('backgroundLocker').style.justifyContent = "space-evenly";
+
+    // Buscar dados dos participantes
+    const participantsData2 = await participantsInfo(pastEvents[index].id);
+    console.log("Participantes:", participantsData2.result);
+    fillHonorCards(participantsData2.result);
+
+    // Buscar CEP
+    const cepData = await cepSearch(pastEvents[index].CEP);
+    console.log("CEP encontrado:", cepData);
+
+    // Formatar data
+    const data = pastEvents[index].event_date.slice(0, -14);
+    const partes = data.split("-");
+
+    // Buscar quantidade de participantes
+    const participantsData = await participantsQuantity(pastEvents[index].id);
+
+    // Buscar nome do organizador usando organizerId (corrigido)
+    const userIdResponse = await fetch(`http://localhost:3000/userId?id=${organizerId}`);
+    if (!userIdResponse.ok) {
+        throw new Error(`Erro ao buscar organizador: ${userIdResponse.statusText}`);
+    }
+    const organizerData = await userIdResponse.json();
+    console.log("Organizador encontrado:", organizerData);
+
+    // Atualizar o card com os dados
+    document.getElementById("card").innerHTML = `
+        <h3>${pastEvents[index].name}</h3>
+        <a>${organizerData.name}</a>
+        <p id="description">${pastEvents[index].description}</p>
+        <p>${pastEvents[index].event_type}</p>
+        <div class="divide">
+            <p><strong>Data:</strong> ${partes[2]}/${partes[1]}/${partes[0]}</p>
+            <p><strong>Hora:</strong> ${pastEvents[index].event_time.slice(0, -3)}</p>
+        </div>
+        <p>Participantes: ${participantsData.participants}/${pastEvents[index].participants}</p>
+        <a href="https://api.whatsapp.com/send?phone=55${pastEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
+        <p><strong>Endereço:</strong> ${cepData.bairro} - ${cepData.localidade} - ${cepData.uf}</p>
+    `;
+
+    console.log("Card atualizado com sucesso!");
+}
+async function renderActiveCard(button) {
+    const values = JSON.parse(button.value); // Converte string JSON para array
+    const index = values[0]; // Obtém o índice correto
+    const organizerId = values[1]; // Obtém o ID do organizador
+
+    if (!activeEvents[index]) {
+        console.error(`Erro: Evento não encontrado no índice ${index}`);
+        return;
+    }
+
     const cepData = await cepSearch(activeEvents[index].CEP);
-
     const data = activeEvents[index].event_date.slice(0, -14);
-        const partes = data.split("-")
+    const partes = data.split("-");
 
-        const participantsData = await participantsQuantity(activeEvents[index].id)
-        
-    if(button.value[2] != userData.id){//Se o if do usuário for diferente do de quem criou o evento
+    const participantsData = await participantsQuantity(activeEvents[index].id);
 
-        
-
-        const userIdResponse = await fetch(`http://localhost:3000/userId?id=${button.value[2]}`);
+    if (organizerId != userData.id) { // Verifica se o usuário é o organizador
+        const userIdResponse = await fetch(`http://localhost:3000/userId?id=${organizerId}`);
         if (!userIdResponse.ok) {
             throw new Error(`Erro: ${userIdResponse.statusText}`);
         }
-        const organizerData = await userIdResponse.json();//usado para resgatar o nome do criador do grupo
+        const organizerData = await userIdResponse.json();
 
         document.getElementById(`card`).innerHTML = `
-        <h3 id="activeName0">${activeEvents[index].name}</h3>
-                    <a>${organizerData.name}</a>
-                    <p id="description">${activeEvents[index].description}</p>
-                    <p>${activeEvents[index].event_type}</p>
-                    <div class="divide">
-                        <p id="activeDate0"><strong>Data:</strong> ${partes[2]+"/"+partes[1]+"/"+partes[0]}</p>
-                        <p id="activeTime0"><strong>Hora:</strong> ${activeEvents[index].event_time.slice(0, -3)}</p>
-                    </div>
-                    <p>participantes: ${participantsData.participants}/${activeEvents[index].participants}</p>
-                    <a href = "https://api.whatsapp.com/send?phone=55${activeEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
-                    <p id="activeAddress0"><strong>Endereço:</strong> ${cepData.bairro+" - "+cepData.localidade+" - "+cepData.uf}</p>
-                    <button onclick="deleteUserEvent(${index})"> sair </button>
-                    
-    `;
-        console.log('você não é o dono deste evento')
-    }else{
+            <h3 id="activeName0">${activeEvents[index].name}</h3>
+            <a>${organizerData.name}</a>
+            <p id="description">${activeEvents[index].description}</p>
+            <p>${activeEvents[index].event_type}</p>
+            <div class="divide">
+                <p id="activeDate0"><strong>Data:</strong> ${partes[2]}/${partes[1]}/${partes[0]}</p>
+                <p id="activeTime0"><strong>Hora:</strong> ${activeEvents[index].event_time.slice(0, -3)}</p>
+            </div>
+            <p>Participantes: ${participantsData.participants}/${activeEvents[index].participants}</p>
+            <a href="https://api.whatsapp.com/send?phone=55${activeEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
+            <p id="activeAddress0"><strong>Endereço:</strong> ${cepData.bairro} - ${cepData.localidade} - ${cepData.uf}</p>
+            <button onclick="deleteUserEvent(${index})">Sair</button>
+        `;
+        console.log("Você não é o dono deste evento.");
+    } else {
         const formatDate = (dateString) => {
             const date = new Date(dateString);
             return date.toISOString().split('T')[0]; // Retorna no formato "YYYY-MM-DD"
@@ -368,6 +397,7 @@ async function participantsQuantity(groupId){
         
 
         console.log(document.getElementById("deleteButton").value)
+        location.reload();
     }
   });
 
@@ -444,15 +474,15 @@ async function fillHonorCards(participants){
             <h3>${participants[i].name}</h3>
             
             <div class="honorImages"> 
-            <button onclick="changeHonor(${participants[i].id},'leadership')"><img src="../src/lider.png"></button>
+            <button onclick="changeHonor(${participants[i].id},'leadership')"><img src="../src/lider.png" title="Liderança"></button>
             </div>
             <h2>${honorData.leadership_honors}</h2>
             <div class="honorImages"> 
-            <button onclick="changeHonor(${participants[i].id},'sociable')"><img src="../src/sociavel.png"></button>
+            <button onclick="changeHonor(${participants[i].id},'sociable')"><img src="../src/sociavel.png" title="Sociável"></button>
             </div>
             <h2>${honorData.sociable_honors}</h2>
             <div class="honorImages"> 
-               <button onclick="changeHonor(${participants[i].id},'participative')"><img src="../src/participativo.png"></button>
+               <button onclick="changeHonor(${participants[i].id},'participative')"><img src="../src/participativo.png" title="Participativo"></button>
             </div>
              <h2>${honorData.participative_honors}</h2>
         `;
@@ -492,4 +522,67 @@ async function changeHonor(honoredId, honor_type){
         const result = await response.json();
     }
     fillHonorCards(honorParticipants);
+}
+async function changeRating(button) {
+    let rating
+    if(button.value){
+        rating = parseInt(button.value); // Converte para número
+    }else{
+        rating = button
+    }
+    
+    
+    document.getElementById('finishRatingBtn').value = rating
+    
+    for (let i = 1; i <= 5; i++) {
+        document.getElementById(`star${i}`).src = '../src/blankStar.png';
+    }
+    for (let i = 1; i <= rating; i++) {
+        document.getElementById(`star${i}`).src = '../src/yellowStar.png';
+    }
+}
+async function rate(button){
+    let ratedId =document.getElementById('stars').value
+    let userComment = document.getElementById('comment').value
+    let ratingValue = button.value;
+    let exists = false
+    console.log(ratedId, userComment, ratingValue, userData.id)
+    
+
+    const ratingsResponse = await fetch(`http://localhost:3000/getRatings?userId=${ratedId}`, {
+        method: 'GET'
+    });
+    
+    let ratingsResult = await ratingsResponse.json();
+    for(let i = 0;i<ratingsResult.ratings.length;i++){
+        if(ratingsResult.ratings[i].rating_user_id!=userData.id){
+            continue;
+        }else{
+            exists=true
+        }
+    }
+
+    if(exists){
+        
+        const response = await fetch('http://localhost:3000/editRating', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify({ fromUserId: userData.id, toUserId: ratedId, rating: ratingValue, comment: userComment })  
+        });
+        const result = await response.json();
+    }else{
+
+        const response = await fetch('http://localhost:3000/addRating', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+    
+            body: JSON.stringify({ fromUserId: userData.id, toUserId:ratedId, rating:ratingValue, comment:userComment })
+        });
+        const result = await response.json();
+        console.log(result)
+    }
+    fillHonorCards(honorParticipants)
+
 }

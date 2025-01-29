@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <a href="../html/userInfo.html">s</a>
     <div id="backgroundLocker">
         
         <div id="card">
@@ -15,22 +15,30 @@
         
         <div id="rate">
             <div id="rateOrganizer">
-                <button value="1">
-                    <img src="../src/blankStar.png" alt="estrela" class="star" >
-                </button>
-                <button value="2">
-                    <img src="../src/blankStar.png" alt="estrela" class="star" >
-                </button>
-                <button value="3">
-                    <img src="../src/blankStar.png" alt="estrela" class="star" >
-                </button>
-                <button value="4">
-                    <img src="../src/blankStar.png" alt="estrela" class="star" >
-                </button>
-                <button value="5">
-                    <img src="../src/blankStar.png" alt="estrela" class="star" >
-                </button>
+                <div id="stars">
+                    <button value="1" onclick=changeRating(this)>
+                        <img id="star1" src="../src/yellowStar.png" alt="estrela" class="star" >
+                    </button>
+                    <button value="2" onclick=changeRating(this)>
+                        <img id="star2" src="../src/yellowStar.png" alt="estrela" class="star" >
+                    </button>
+                    <button value="3" onclick=changeRating(this)>
+                        <img id="star3" src="../src/yellowStar.png" alt="estrela" class="star" >
+                    </button>
+                    <button value="4" onclick=changeRating(this)>
+                        <img id="star4" src="../src/yellowStar.png" alt="estrela" class="star" >
+                    </button>
+                    <button value="5" onclick=changeRating(this)>
+                        <img id="star5" src="../src/yellowStar.png" alt="estrela" class="star" >
+                    </button>
+                </div>
+                <div id="commentInput">
+                    <label for="comment">Detalhe:</label>
+                    <textarea id="comment" name="description" required maxlength="500"></textarea>
+                </div>
+                <button id="finishRatingBtn" value="5" onclick=rate(this)>oi</button>
             </div>
+            
             <div id="participantsHonor"></div>
         </div>
     </div>

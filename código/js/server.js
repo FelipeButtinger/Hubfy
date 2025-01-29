@@ -414,6 +414,84 @@ app.delete('/deleteHonor', (req, res) => {
     res.status(200).json({ message: 'Honra excluída com sucesso' });
   });
 });
+app.get('/getRatings', (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+      return res.status(400).json({ error: 'Parâmetro obrigatório: userId' });
+  }
+
+  // Query para buscar todas as avaliações recebidas pelo usuário
+  const queryRatings = `
+      SELECT rating_user_id, rating_value, comment, created_at 
+      FROM ratings 
+      WHERE rated_user_id = ?;
+  `;
+
+  // Query para calcular a média das avaliações recebidas
+  const queryAverage = `
+      SELECT COALESCE(AVG(rating_value), 0) AS average_rating 
+      FROM ratings 
+      WHERE rated_user_id = ?;
+  `;
+
+  db.query(queryRatings, [userId], (err, ratingsResult) => {
+      if (err) {
+          console.error('Erro ao buscar avaliações:', err);
+          return res.status(500).json({ error: 'Erro no servidor ao buscar avaliações' });
+      }
+
+      db.query(queryAverage, [userId], (err, averageResult) => {
+          if (err) {
+              console.error('Erro ao calcular média:', err);
+              return res.status(500).json({ error: 'Erro no servidor ao calcular média' });
+          }
+
+          res.status(200).json({
+              ratings: ratingsResult,
+              average_rating: averageResult[0].average_rating
+          });
+      });
+  });
+});
+app.post('/addRating', (req, res) => {
+  const { fromUserId, toUserId, rating, comment } = req.body;
+
+  if (!fromUserId || !toUserId || !rating || !comment) {
+    return res.status(400).json({ error: 'Parâmetros obrigatórios: fromUserId, toUserId e honorType' });
+  }
+
+  const query = `
+    INSERT INTO ratings (rating_user_id, rated_user_id, rating_value, comment) 
+    VALUES (?, ?, ?, ?);
+  `;
+
+  db.query(query, [fromUserId, toUserId, rating, comment], (err, result) => {
+    if (err) {
+      console.error('Erro no servidor:', err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    res.status(201).json({ message: 'nota adicionada com sucesso' });
+  });
+});
+app.put('/editRating', async (req, res) => {
+  const { fromUserId, toUserId, rating, comment } = req.body;  
+  
+
+  // Atualiza o email e senha do usuário
+  db.query('UPDATE ratings SET rating_value = ?, comment = ? WHERE rating_user_id = ? and rated_user_id = ?', [rating, comment, fromUserId, toUserId], (err, result) => {
+    if (err) throw err;
+
+    // Verifica se a atualização foi bem-sucedida
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Evento não encontrado');
+    }
+
+    res.json({ message: 'nota atualizada com sucesso' });
+  });
+});
+
 // Inicia o servidor na porta 3000
 app.listen(3000, () => {
   console.log('Servidor rodando na porta 3000');

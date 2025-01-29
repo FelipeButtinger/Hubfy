@@ -10,7 +10,7 @@ aside{
   
 }
 main{
-    width: 60dvw;
+    width: 80dvw;
     height: 100dvh;
     background-color: aquamarine;
 
@@ -164,4 +164,8 @@ button img{
 }
 .honorCard img{
     cursor: pointer;
+}
+#comment{
+    height: 60px;
+    resize: none;
 }
