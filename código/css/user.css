@@ -133,6 +133,8 @@ button img{
     height: 80dvh;
     width: 25dvw;
     background-color: darkgoldenrod;
+    display: flex;
+    flex-direction: column;
 }
 .star {
     width:  3dvw;
@@ -147,4 +149,19 @@ button img{
 #description{
     width: 90%;
     font-size: 20px;
+}
+.honorCard{
+    display: flex;
+    width: 90%;
+    height: 50px;
+    flex-direction: row;
+}
+.honorImages button{
+    height: 40px;
+    background-color: transparent; 
+  border: none; 
+  outline: none; 
+}
+.honorCard img{
+    cursor: pointer;
 }

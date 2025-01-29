@@ -145,12 +145,12 @@ async function entrarCardEvento(button) {
         }
         const cepData = await cepResponse.json();
         
-        const participantsResponse = await fetch(`http://localhost:3000/participantsQuantity?groupId=${selectedEvent}`);
+        const participantsResponse = await fetch(`http://localhost:3000/participants?groupId=${selectedEvent}`);
         if (!eventResponse.ok) {
             throw new Error(`Erro: ${eventResponse.statusText}`);
         }
         participantsData = await participantsResponse.json();
-        console.log(participantsData.participants)
+        console.log(participantsData.result)
         
         document.getElementById('description').textContent = eventData.description;
         document.getElementById('type').textContent = eventData.event_type;

@@ -257,6 +257,7 @@ app.get('/userId', (req, res) => {//retorna algumas informações com o id forne
   });
 });
 
+
 app.delete('/leaveEvent', async (req, res) => {
   const { user_id, event_id } = req.body;
 
@@ -309,6 +310,108 @@ app.delete('/event', (req, res) => {
     }
 
     res.send('evento deletado com sucesso');
+  });
+});
+app.get('/honorInfo', (req, res) => {
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ error: 'ID do usuário não fornecido' });
+  }
+
+  const query = `
+    SELECT 
+      SUM(CASE WHEN honor_type = 'sociable' THEN 1 ELSE 0 END) AS sociable_honors,
+      SUM(CASE WHEN honor_type = 'leadership' THEN 1 ELSE 0 END) AS leadership_honors,
+      SUM(CASE WHEN honor_type = 'participative' THEN 1 ELSE 0 END) AS participative_honors
+    FROM honors
+    WHERE honored_user_id = ?;
+  `;
+
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      console.error('Erro no servidor:', err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    if (results.length === 0 || !results[0]) {
+      return res.status(404).json({ error: 'Nenhuma honra encontrada para o usuário' });
+    }
+
+    res.json(results[0]);
+  });
+});
+app.post('/addHonor', (req, res) => {
+  const { fromUserId, toUserId, honorType } = req.body;
+
+  if (!fromUserId || !toUserId || !honorType) {
+    return res.status(400).json({ error: 'Parâmetros obrigatórios: fromUserId, toUserId e honorType' });
+  }
+
+  const query = `
+    INSERT INTO honors (honoring_user_id, honored_user_id, honor_type) 
+    VALUES (?, ?, ?);
+  `;
+
+  db.query(query, [fromUserId, toUserId, honorType], (err, result) => {
+    if (err) {
+      console.error('Erro no servidor:', err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    res.status(201).json({ message: 'Honra adicionada com sucesso' });
+  });
+});
+
+app.get('/checkHonor', (req, res) => {
+  const { fromUserId, toUserId, honorType } = req.query;
+
+  if (!fromUserId || !toUserId || !honorType) {
+    return res.status(400).json({ error: 'Parâmetros obrigatórios: fromUserId, toUserId e honorType' });
+  }
+
+  const query = `
+    SELECT * 
+    FROM honors 
+    WHERE honoring_user_id = ? AND honored_user_id = ? AND honor_type = ?;
+  `;
+
+  db.query(query, [fromUserId, toUserId, honorType], (err, result) => {
+    if (err) {
+      console.error('Erro no servidor:', err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    if (result.length > 0) {
+      return res.status(200).json({ exists: true, message: 'Honra já existe' });
+    }
+
+    res.status(404).json({ exists: false, message: 'Honra não encontrada' });
+  });
+});
+app.delete('/deleteHonor', (req, res) => {
+  const { fromUserId, toUserId, honorType } = req.body;
+
+  if (!fromUserId || !toUserId || !honorType) {
+    return res.status(400).json({ error: 'Parâmetros obrigatórios: fromUserId, toUserId e honorType' });
+  }
+
+  const query = `
+    DELETE FROM honors 
+    WHERE honoring_user_id = ? AND honored_user_id = ? AND honor_type = ?;
+  `;
+
+  db.query(query, [fromUserId, toUserId, honorType], (err, result) => {
+    if (err) {
+      console.error('Erro no servidor:', err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Honra não encontrada' });
+    }
+
+    res.status(200).json({ message: 'Honra excluída com sucesso' });
   });
 });
 // Inicia o servidor na porta 3000

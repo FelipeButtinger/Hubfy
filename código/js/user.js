@@ -2,6 +2,7 @@ let activeEvents =[];
 let pastEvents =[];
 let userData = 0;
 let page = 1;
+let honorParticipants = [];
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -194,7 +195,7 @@ async function renderPastCard(button){
 
     const participantsData2 = await participantsInfo(pastEvents[index].id)
     console.log(participantsData2.result)
-    fillHonorCards(participantsData2.result);
+    fillHonorCards(participantsData2.result, );
        
     console.log(button.value[0], pastEvents[index]);
         const cepData = await cepSearch(pastEvents[index].CEP);
@@ -416,20 +417,79 @@ const participantsResponse = await fetch(`http://localhost:3000/participantsInfo
 }
   
 async function fillHonorCards(participants){
+    document.querySelectorAll('.honorCard').forEach(div => div.remove());
+    honorParticipants = participants;
     for(let i = 0;i<participants.length;i++){
-        console.log(participants)
+        if(participants[i].id == userData.id){
+
+        }else{
+        const allHonorResponse = await fetch(`http://localhost:3000/honorInfo?id=${participants[i].id}`, {
+            method: 'GET'
+        });
+
+        honorData = await allHonorResponse.json();
+        if(honorData.leadership_honors==null){
+            honorData.leadership_honors = 0
+        }
+        if(honorData.sociable_honors==null){
+            honorData.sociable_honors = 0
+        }
+        if(honorData.participative_honors==null){
+            honorData.participative_honors = 0
+        }
         const div = document.createElement('div');
-        div.classList.add('eventCard');
-        
+        div.classList.add('honorCard');
+        div.id = `honorCard${i}`
         div.innerHTML = `
             <h3>${participants[i].name}</h3>
             
-            <button>teste</button>
+            <div class="honorImages"> 
+            <button onclick="changeHonor(${participants[i].id},'leadership')"><img src="../src/lider.png"></button>
+            </div>
+            <h2>${honorData.leadership_honors}</h2>
+            <div class="honorImages"> 
+            <button onclick="changeHonor(${participants[i].id},'sociable')"><img src="../src/sociavel.png"></button>
+            </div>
+            <h2>${honorData.sociable_honors}</h2>
+            <div class="honorImages"> 
+               <button onclick="changeHonor(${participants[i].id},'participative')"><img src="../src/participativo.png"></button>
+            </div>
+             <h2>${honorData.participative_honors}</h2>
         `;
         
         document.getElementById("participantsHonor").appendChild(div); 
     }
+    }
     
     
 }
-
+async function changeHonor(honoredId, honor_type){
+    
+    const honorResponse = await fetch(`http://localhost:3000/checkHonor?fromUserId=${userData.id}&toUserId=${honoredId}&honorType=${honor_type}`, {
+        method: 'GET'
+    });
+    
+    let honorResult = await honorResponse.json();
+    if(honorResult.exists){
+        
+        const response = await fetch('http://localhost:3000/deleteHonor', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fromUserId: userData.id, toUserId:honoredId, honorType:honor_type }),
+          });
+  
+      const result = await response.json();
+    
+    }else{
+        const response = await fetch('http://localhost:3000/addHonor', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+    
+            body: JSON.stringify({ fromUserId: userData.id, toUserId:honoredId, honorType:honor_type })
+        });
+        const result = await response.json();
+    }
+    fillHonorCards(honorParticipants);
+}
