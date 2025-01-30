@@ -74,7 +74,7 @@ async function fetchEventData(eventId) {
 
         // Cria um elemento HTML com os dados do evento e do endereço
         const div = document.createElement('div');
-div.classList.add('eventCard');
+        div.classList.add('eventCard');
 const data = eventData.event_date.slice(0, -14);
 const partes = data.split("-")
 // Adiciona elementos HTML para cada parte da informação
