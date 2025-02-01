@@ -1,7 +1,8 @@
 const urlParams = new URLSearchParams(window.location.search);
 const thisId = urlParams.get('id');
+const thisName = urlParams.get('name');
 document.addEventListener('DOMContentLoaded', async () => {
-   
+   document.getElementById('userName').textContent = thisName
     const token = localStorage.getItem('token'); 
     if (!token) {
         window.location.href = 'login.html';
@@ -20,7 +21,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log(userData.id)
         receiveHonors()
         receiveRatings()
- 
+        const userImage = await fetchUserImage(thisId);
+        document.getElementById('profilePic').src = userImage;
 })
 async function receiveHonors(){
     const allHonorResponse = await fetch(`http://localhost:3000/honorInfo?id=${thisId}`, {
@@ -60,30 +62,72 @@ async function receiveRatings(){
         }
     });
 }
-function userComment(rating){
+async function userComment(rating){
+    const userImage = await fetchUserImage(userData.id);
     document.getElementById('yourRating').innerHTML = `
     <div id='topHalf' style="height: 5dvh;display:flex;justify-content: space-around">
-    <div style="height: 5dvh;display:flex"><img style="height: 5dvh" src="../src/lider.png" alt=""><h3>${userData.name}</h3></div>
-    <div style="height: 5dvh;display:flex"><img style="height: 5dvh" src="../src/yellowStar.png" alt=""><h3>${rating.rating_value}</h3></div>
+        <div style="height: 5dvh;display:flex">
+            <img style="height: 5dvh;border-radius: 50%" src="${userImage}" alt="Sua Foto">
+            <h3>Você</h3>
+        </div>
+        <div style="height: 5dvh;display:flex">
+            <img style="height: 5dvh" src="../src/yellowStar.png" alt="Estrela">
+            <h3>${rating.rating_value}</h3>
+        </div>
     </div>
-    <div id='bottomHalf ' style="height: 90%;display:flex; justify-content:center;align-items:center">
-    <textarea style="resize: none;height: 60%;width: 35dvw;display:flex" id="comment" name="description" required maxlength="500">${rating.comment}</textarea>
+    <div id='bottomHalf' style="height: 90%;display:flex; justify-content:center;align-items:center">
+        <textarea readonly style="resize: none;height: 60%;width: 35dvw;display:flex" 
+                  id="comment" name="description" required maxlength="500">${rating.comment}</textarea>
     </div>
-    `
+    `;
+    document.getElementById('yourRating').style.display = "block";
 }
-function addComment(rating){
+async function addComment(rating) {
+    const raterInfo = await getUser(rating.rating_user_id); 
+    const userImage = await fetchUserImage(rating.rating_user_id); 
+
     const div = document.createElement('div');
     div.classList.add('commentCard');
 
     div.innerHTML = `
-    <div id='topHalf' style="height: 5dvh;display:flex;justify-content: space-around">
-    <div style="height: 5dvh;display:flex"><img style="height: 5dvh" src="../src/lider.png" alt=""><h3>${userData.name}</h3></div>
-    <div style="height: 5dvh;display:flex"><img style="height: 5dvh" src="../src/yellowStar.png" alt=""><h3>${rating.rating_value}</h3></div>
-    </div>
-    <div id='bottomHalf ' style="height: 90%;display:flex; justify-content:center;align-items:center">
-    <textarea style="resize: none;height: 60%;width: 35dvw;display:flex" id="comment" name="description" required maxlength="500">${rating.comment}</textarea>
-    </div>
-    
-`;
-    comments.appendChild(div); // Adiciona ao elemento <main>
+        <div id='topHalf' style="height: 5dvh;display:flex;justify-content: space-around">
+            <div style="height: 5dvh;display:flex">
+                <img style="height: 5dvh; border-radius: 50%;" src="${userImage}" alt="${raterInfo.name}">
+                <h3>${raterInfo.name}</h3> 
+            </div>
+            <div style="height: 5dvh;display:flex">
+                <img style="height: 5dvh" src="../src/yellowStar.png" alt="Estrela">
+                <h3>${rating.rating_value}</h3>
+            </div>
+        </div>
+        <div id='bottomHalf' style="height: 90%;display:flex; justify-content:center;align-items:center">
+            <textarea readonly style="resize: none;height: 60%;width: 35dvw;display:flex" 
+                      id="comment" name="description" required maxlength="500">${rating.comment}</textarea>
+        </div>
+    `;
+
+    document.getElementById('comments').appendChild(div); // Adiciona ao container de comentários
+}
+
+async function getUser(userId){
+    const userIdResponse = await fetch(`http://localhost:3000/userId?id=${userId}`);
+    if (!userIdResponse.ok) {
+        throw new Error(`Erro ao buscar organizador: ${userIdResponse.statusText}`);
+    }
+    return await userIdResponse.json();
+}
+async function fetchUserImage(userId) {
+    try {
+        const response = await fetch(`http://localhost:3000/userImage/${userId}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            return URL.createObjectURL(blob); // Retorna a URL gerada
+        } else {
+            console.error('Erro ao buscar a imagem:', response.statusText);
+            return "../src/defaultUser.png"; // Imagem padrão caso ocorra erro
+        }
+    } catch (error) {
+        console.error('Erro ao buscar a imagem:', error);
+        return "../src/sociavel.png"; // Imagem padrão em caso de erro
+    }
 }

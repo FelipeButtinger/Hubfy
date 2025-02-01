@@ -28,7 +28,7 @@ main{
     width: 80dvw;
     height: 90dvh;
 
-    background-color: aquamarine;
+    
 }
 #userInfo{
     display: flex;
@@ -83,5 +83,9 @@ min-height: 60px;
 .commentCard{
     width: 60dvw;
     height: 20dvh;
-    border-style:solid;
+    
+    
+}
+#yourRating{
+    display: none;
 }

@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', async () => {
 
     const token = localStorage.getItem('token'); 
@@ -6,23 +5,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'login.html';
         return;
     }
-    // Seleciona os elementos onde as informações do usuário e mensagens serão exibidas
-    // Realiza uma requisição para obter os dados do usuário autenticado
+
     const response = await fetch('http://localhost:3000/user', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}` // Certifique-se de que o token está sendo enviado
         }
     });
-    if (response.ok) {
 
+    if (response.ok) {
         userData = await response.json();
-        
         console.log("seu id: ",userData.id);
     } else {
-
         console.log('Erro ao obter dados do usuário.');
     }
+
     const eventDateInput = document.getElementById('event_date');
     eventDateInput.addEventListener('input', () => {
         const today = new Date().toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
@@ -31,11 +28,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             eventDateInput.value = ''; // Limpa o campo
         }
     });
-    
+
     document.getElementById('eventRegisterForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Obtém os valores dos campos de entrada de email e senha
+        // Obtém os valores dos campos de entrada
         const name = document.getElementById('name').value;
         const organizer_id = userData.id;
         const description = document.getElementById('description').value;
@@ -45,34 +42,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         const event_time = document.getElementById('event_time').value;
         const CEP = document.getElementById('cep').value;
         const phone_number = document.getElementById('phone_number').value;
-    
-
-        const response = await fetch('http://localhost:3000/eventRegister', {
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-
-            body: JSON.stringify({ name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number })
-        });
-    
+        
+        // Capture o arquivo de imagem
+        const imageInput = document.getElementById('image');  // Aqui está a captura do input da imagem
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('organizer_id', organizer_id);
+        formData.append('description', description);
+        formData.append('event_type', event_type);
+        formData.append('participants', participants);
+        formData.append('event_date', event_date);
+        formData.append('event_time', event_time);
+        formData.append('CEP', CEP);
+        formData.append('phone_number', phone_number);
+        formData.append('image', imageInput.files[0]); // Pega o arquivo da imagem
 
         const messageElement = document.getElementById('message');
-    
+
+        const response = await fetch('http://localhost:3000/eventRegister', {
+            method: 'POST',
+            body: formData
+        });
 
         if (response.ok) {
-
-            messageElement.textContent = 'Usuário registrado com sucesso!';
-          
+            messageElement.textContent = 'Evento registrado com sucesso!';
+            window.location.href = 'home.html'
         } else {
-           
             const errorMessage = await response.text();
-           
             messageElement.textContent = errorMessage;
         }
-       
-    });//fim do listener submir
-    
-});//fim do DOMContentLoaded
+    });
 
-// TEsta aqui dai Div id="grupsContainer"
-
-
+});

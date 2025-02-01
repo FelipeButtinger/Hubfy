@@ -239,12 +239,17 @@ async function renderPastCard(index, organizerId) {
     }
     const organizerData = await userIdResponse.json();
     console.log("Organizador encontrado:", organizerData);
-
+    const imageUrl = `http://localhost:3000/eventImage/${pastEvents[index].id}`;
     // Atualizar o card com os dados
     document.getElementById("card").innerHTML = `
+    <button onclick="closeCards()">fechar</button>
         <h3>${pastEvents[index].name}</h3>
-        <a>${organizerData.name}</a>
-        <p id="description">${pastEvents[index].description}</p>
+        <img style="width:80%;" src="${imageUrl}" alt="Sua Foto">
+        
+            
+            <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" 
+                  id="comment" name="description" required maxlength="500">${pastEvents[index].description}</textarea>
+                  <a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerData.name}</a>
         <p>${pastEvents[index].event_type}</p>
         <div class="divide">
             <p><strong>Data:</strong> ${partes[2]}/${partes[1]}/${partes[0]}</p>
@@ -279,11 +284,17 @@ async function renderActiveCard(button) {
             throw new Error(`Erro: ${userIdResponse.statusText}`);
         }
         const organizerData = await userIdResponse.json();
-
+        console.log(activeEvents[index].id)
+        const imageUrl = `http://localhost:3000/eventImage/${activeEvents[index].id}`;
+        
         document.getElementById(`card`).innerHTML = `
+        <button onclick="closeCards()">fechar</button>
             <h3 id="activeName0">${activeEvents[index].name}</h3>
-            <a>${organizerData.name}</a>
-            <p id="description">${activeEvents[index].description}</p>
+            <img style="width:80%;" src="${imageUrl}" alt="Sua Foto">
+
+            <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" 
+                  id="comment" name="description" required maxlength="500">${activeEvents[index].description}</textarea>
+                  <a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerData.name}</a>
             <p>${activeEvents[index].event_type}</p>
             <div class="divide">
                 <p id="activeDate0"><strong>Data:</strong> ${partes[2]}/${partes[1]}/${partes[0]}</p>
@@ -585,4 +596,22 @@ async function rate(button){
     }
     fillHonorCards(honorParticipants)
 
+}
+async function fetchUserImage(userId) {
+    try {
+        const response = await fetch(`http://localhost:3000/userImage/${userId}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            return URL.createObjectURL(blob); // Retorna a URL gerada
+        } else {
+            console.error('Erro ao buscar a imagem:', response.statusText);
+            return "../src/defaultUser.png"; // Imagem padrão caso ocorra erro
+        }
+    } catch (error) {
+        console.error('Erro ao buscar a imagem:', error);
+        return "../src/sociavel.png"; // Imagem padrão em caso de erro
+    }
+}
+function closeCards(){
+    location.reload();
 }

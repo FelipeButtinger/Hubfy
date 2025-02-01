@@ -5,7 +5,14 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs'); 
+const multer = require('multer');
 
+// Configuração do multer para processar uploads de arquivos
+const upload = multer({
+    limits: {
+        fileSize: 50 * 1024 * 1024, // Limite de 50MB para o arquivo
+    },
+});
 const app = express();
 const SECRET_KEY = 'seu_segredo_aqui'; // Substitua por um segredo seguro para gerar tokens JWT
 
@@ -27,33 +34,78 @@ db.connect((err) => {
   console.log('Conectado ao banco de dados MySQL!');
 });
 
-// Rota para registrar usuários
-app.post('/register', async (req, res) => {
-  const { contact_info,name, age, password } = req.body; // Obtém o email e senha do corpo da requisição
-  const hashedPassword = await bcrypt.hash(password, 10); // Criptografa a senha para segurança
 
-  // Verifica se o usuário já existe
-  db.query('SELECT contact_info FROM users WHERE contact_info = ?', [contact_info], (err, result) => {
-    if (err) throw err;
-    if (result.length > 0) {
-      return res.status(400).send('Usuário já existe');
-    }
+app.post('/register', upload.single('profilePhoto'), async (req, res) => {
+  const { name, contact_info, age, password } = req.body;
+  const profilePhoto = req.file ? req.file.buffer : null; // O arquivo é acessado via req.file
 
-    // Insere o novo usuário no banco de dados
-    db.query('INSERT INTO users (name, contact_info, age, password) VALUES (?, ?, ?, ?)', [name, contact_info,age, hashedPassword], (err, result) => {
-      if (err) throw err;
-      res.send('Usuário registrado com sucesso');
-    });
+  if (!profilePhoto) {
+      return res.status(400).json({ error: 'Nenhuma imagem foi enviada.' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10); // Criptografa a senha
+
+  const sql = 'INSERT INTO users (name, age, contact_info, password, profile_photo) VALUES (?, ?, ?, ?, ?)';
+  db.query(sql, [name, age, contact_info, hashedPassword, profilePhoto], (err, result) => {
+      if (err) {
+          console.error('Erro ao registrar usuário:', err);
+          return res.status(500).json({ error: 'Erro no servidor' });
+      }
+      res.json({ message: 'Usuário registrado com sucesso!', userId: result.insertId });
   });
 });
 
-app.post('/eventRegister', async (req, res) => {
-  const { name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number} = req.body;
-    db.query('INSERT INTO events (name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, organizer_id, description, event_type, participants,event_date, event_time, CEP, phone_number], (err, result) => {
+// Rota para buscar a imagem do usuário
+app.get('/userImage/:id', (req, res) => {
+  const userId = req.params.id;
+
+  db.query('SELECT profile_photo FROM users WHERE id = ?', [userId], (err, result) => {
+      if (err) {
+          console.error('Erro ao buscar imagem:', err);
+          return res.status(500).json({ error: 'Erro no servidor' });
+      }
+
+      if (result.length > 0 && result[0].profile_photo) {
+          res.contentType('image/jpeg'); // Ou 'image/png' conforme o tipo
+          res.send(result[0].profile_photo);
+      } else {
+          res.status(404).send('Imagem não encontrada');
+      }
+  });
+});
+app.post('/eventRegister', upload.single('image'), (req, res) => {
+  // Recupera os dados do formulário e a imagem enviada
+  const { name, organizer_id, description, event_type, participants, event_date, event_time, CEP, phone_number } = req.body;
+  const imageBuffer = req.file ? req.file.buffer : null; // Aqui estamos pegando a imagem em formato binário
+
+  // Insere os dados no banco de dados
+  db.query(
+    'INSERT INTO events (name, organizer_id, description, event_type, participants, event_date, event_time, CEP, phone_number, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [name, organizer_id, description, event_type, participants, event_date, event_time, CEP, phone_number, imageBuffer],
+    (err, result) => {
       if (err) throw err;
       res.send('Evento registrado com sucesso');
-    });
-  
+    }
+  );
+});
+
+// Rota para obter a imagem armazenada no banco de dados
+app.get('/eventImage/:id', (req, res) => {
+  const eventId = req.params.id;
+
+  db.query('SELECT image FROM events WHERE id = ?', [eventId], (err, result) => {
+    if (err) {
+      console.error('Erro ao buscar imagem:', err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    if (result.length > 0 && result[0].image) {
+      res.contentType('image/jpeg'); // Ou 'image/png' dependendo do tipo de imagem
+      res.send(result[0].image);
+    } else {
+      res.status(404).send('Imagem não encontrada');
+    }
+  });
 });
 
 app.post('/participantsRegister', async (req, res) => {
