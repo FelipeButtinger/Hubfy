@@ -1,3 +1,5 @@
+const urlParams = new URLSearchParams(window.location.search);
+const thisId = urlParams.get('eventId');
 document.addEventListener('DOMContentLoaded', async () => {
 
     const token = localStorage.getItem('token'); 
@@ -73,4 +75,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    console.log(thisId)
 });

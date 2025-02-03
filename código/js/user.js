@@ -298,7 +298,7 @@ async function renderActiveCard(button) {
         <a href="https://api.whatsapp.com/send?phone=55${activeEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
         <p><strong>Endereço:</strong> ${cepData.bairro} - ${cepData.localidade} - ${cepData.uf}</p>
         ${organizerId === userData.id ? `
-            <button onclick="editEvent(${index})">Editar</button>
+            <button onclick="redirect(${activeEvents[index].id})">Editar</button>
             <button onclick="deleteEvent(${activeEvents[index].id})">Excluir</button>
         ` : `<button onclick="deleteUserEvent(${index})">Sair</button>`}
     `;
@@ -558,4 +558,7 @@ async function fetchUserImage(userId) {
 }
 function closeCards(){
     location.reload();
+}
+function redirect(eventId){
+    window.location.href = `eventCreation.html?eventId=${eventId}`;
 }
