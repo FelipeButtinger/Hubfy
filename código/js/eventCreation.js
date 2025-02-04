@@ -98,13 +98,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (response.ok) {
                 messageElement.textContent = isEditing ? 'Evento atualizado com sucesso!' : 'Evento registrado com sucesso!';
-                window.location.href = 'user.html';
+                window.location.href = 'user.html'; 
+
             } else {
                 messageElement.textContent = await response.text();
             }
         } catch (error) {
             messageElement.textContent = 'Erro ao processar a requisição.';
             console.error(error);
+            
         }
     });
 
