@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
 });//fim do DOMContentLoaded
 
- async function renderCards(action){
+async function renderCards(action){
     let pageQuantity = pastEvents.length/6
     
     
@@ -103,7 +103,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById(`activeCard${index}`).style.display = "flex";
     document.getElementById(`createIcon${index}`).style.display = "none"
     }
-    
+    if(pastEvents.length < 7){
+        document.getElementById("next").disabled = true;
+    }
     switch(action){
         case 0:
         if(page==1 ){
@@ -112,11 +114,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById("back").disabled = true;
             page = page-1
         }
+        
         else{
             page = page -1;
+            document.getElementById("next").disabled = false;
         }
-        document.getElementById("next").disabled = false;
-        if(pastEvents.length ==0 ){
+        
+        if(pastEvents.length ==0){
             document.getElementById("next").disabled = true;
         }
         break;
@@ -248,7 +252,7 @@ async function renderPastCard(index, organizerId) {
         
             
             <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" 
-                  id="comment" name="description" required maxlength="500">${pastEvents[index].description}</textarea>
+                  id="description" name="description" required maxlength="500">${pastEvents[index].description}</textarea>
                   <a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerData.name}</a>
         <p>${pastEvents[index].event_type}</p>
         <div class="divide">
@@ -287,7 +291,7 @@ async function renderActiveCard(button) {
         <button onclick="closeCards()">fechar</button>
         <h3 id="activeName0">${activeEvents[index].name}</h3>
         <img style="width:80%;" src="${imageUrl}" alt="Sua Foto">
-        <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" id="comment" name="description" maxlength="500">${activeEvents[index].description}</textarea>
+        <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" id="description" name="description" maxlength="500">${activeEvents[index].description}</textarea>
         ${organizerName}
         <p>${activeEvents[index].event_type}</p>
         <div class="divide">

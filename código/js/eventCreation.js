@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-
+    
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = 'login.html';
@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const formData = new FormData();
         formData.append(isEditing ? 'newName' : 'name', name);
+        formData.append(isEditing ? 'sameOrganizerId' : 'organizer_id', userData.id);
         formData.append(isEditing ? 'newDescription' : 'description', description);
         formData.append(isEditing ? 'newEvent_Type' : 'event_type', event_type);
         formData.append(isEditing ? 'newParticipants' : 'participants', participants);
