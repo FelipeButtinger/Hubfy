@@ -153,44 +153,93 @@ async function entrarCardEvento(button) {
   selectedEvent = button.value;
 
   try {
-    // Obtém os dados do evento
-    const eventResponse = await fetch(`http://localhost:3000/eventId?id=${selectedEvent}`);
-    if (!eventResponse.ok) {
-      throw new Error(`Erro: ${eventResponse.statusText}`);
-    }
-    const eventData = await eventResponse.json();
+      // Obtém os dados do evento
+      const eventResponse = await fetch(`http://localhost:3000/eventId?id=${selectedEvent}`);
+      if (!eventResponse.ok) {
+          throw new Error(`Erro: ${eventResponse.statusText}`);
+      }
+      const eventData = await eventResponse.json();
 
-    // Carrega a imagem do evento
-    const imageUrl = `http://localhost:3000/eventImage/${selectedEvent}`;
-    document.getElementById('eventImage').src = imageUrl;
+      // Carrega a imagem do evento
+      const imageUrl = `http://localhost:3000/eventImage/${selectedEvent}`;
+      document.getElementById('eventImage').src = imageUrl;
 
-    // Obtém os dados do CEP
-    const cepResponse = await fetch(`https://viacep.com.br/ws/${eventData.CEP}/json/`);
-    if (!cepResponse.ok) {
-      throw new Error(`Erro ao buscar CEP: ${cepResponse.statusText}`);
-    }
-    const cepData = await cepResponse.json();
+      // Obtém os dados do CEP
+      const cepResponse = await fetch(`https://viacep.com.br/ws/${eventData.CEP}/json/`);
+      if (!cepResponse.ok) {
+          throw new Error(`Erro ao buscar CEP: ${cepResponse.statusText}`);
+      }
+      const cepData = await cepResponse.json();
 
-    // Obtém o número de participantes
-    const participantsResponse = await fetch(`http://localhost:3000/participantsQuantity?groupId=${selectedEvent}`);
-    if (!participantsResponse.ok) {
-      throw new Error(`Erro: ${participantsResponse.statusText}`);
-    }
-    const participantsData = await participantsResponse.json();
+      // Obtém o número de participantes
+      const participantsResponse = await fetch(`http://localhost:3000/participants?groupId=${selectedEvent}`);
+      if (!participantsResponse.ok) {
+          throw new Error(`Erro: ${participantsResponse.statusText}`);
+      }
+      const participantsData = await participantsResponse.json();
 
-    // Exibe os detalhes do evento
-    document.getElementById('description').textContent = eventData.description;
-    document.getElementById('type').textContent = eventData.event_type;
-    const data = eventData.event_date.slice(0, -14);
-    const partes = data.split('-');
-    document.getElementById('dataHora').textContent = `${partes[2]}/${partes[1]}/${partes[0]} - ${eventData.event_time.slice(0, -3)}`;
-    document.getElementById('local').textContent = `${cepData.bairro} - ${cepData.localidade} - ${cepData.uf}`;
-    document.getElementById('contact').href = `https://api.whatsapp.com/send?phone=55${eventData.phone_number.replace(/[()]/g, '').trim()}`;
-    document.getElementById('participants').textContent = `${participantsData.participants}/${eventData.participants}`;
-    document.getElementById('userEvent').value = selectedEvent;
+      // Remove todos os caracteres não numéricos e espaços do número de telefone
+      const phoneNumber = eventData.phone_number.replace(/\D+/g, '').trim();
+
+      // Exibe os detalhes do evento
+      document.getElementById('preencher').textContent = eventData.name; // Nome do evento
+      document.getElementById('description').textContent = eventData.description; // Descrição do evento
+      document.getElementById('type').textContent = `Tipo: ${eventData.event_type}`;
+      const data = eventData.event_date.slice(0, -14);
+      const partes = data.split('-');
+      document.getElementById('dataHora').textContent = `Data: ${partes[2]}/${partes[1]}/${partes[0]} - Hora: ${eventData.event_time.slice(0, -3)}`;
+      document.getElementById('local').textContent = `Local: ${cepData.bairro}, ${cepData.localidade} - ${cepData.uf}`;
+      document.getElementById('contact').href = `https://api.whatsapp.com/send?phone=55${phoneNumber}`;
+      document.getElementById('participants').textContent = `Participantes: ${participantsData.participants}/${eventData.participants}`;
+      document.getElementById('userEvent').value = selectedEvent;
   } catch (error) {
-    console.error(`Erro ao buscar os dados do evento ${selectedEvent}:`, error.message);
+      console.error(`Erro ao buscar os dados do evento ${selectedEvent}:`, error.message);
   }
+}
+function filterEventsAndGroups() {
+  const searchInput = document.getElementById('searchInput').value.toLowerCase();
+  const filterDate = document.getElementById('filterDate').value;
+  const filterTime = document.getElementById('filterTime').value;
+  const filterParticipants = document.getElementById('filterParticipants').value;
+
+  const eventCards = document.querySelectorAll('#eventsList .eventCard');
+
+  eventCards.forEach(card => {
+      // Extrair dados do card
+      const eventName = card.querySelector('h3')?.textContent.toLowerCase() || '';
+      
+      // Hora do evento
+      const timeElement = card.querySelectorAll('.divide')[1]?.querySelector('p:nth-child(2)');
+      const eventTime = timeElement?.textContent
+          .split(': ')[1]         // Pega o valor após "Hora: "
+          ?.split(':').slice(0, 2).join(':') // Formato HH:mm
+          || '';
+
+      // Data do evento
+      const dateElement = card.querySelectorAll('.divide')[1]?.querySelector('p:first-child');
+      const [dd, mm, yyyy] = dateElement?.textContent
+          .split(': ')[1]         // Pega a data após "Data: "
+          ?.split('/') || [];
+      const convertedDate = yyyy && mm && dd ? `${yyyy}-${mm}-${dd}` : '';
+
+      // Participantes
+      const participantsElement = card.querySelectorAll('.divide')[0]?.querySelector('p:nth-child(2)');
+      const maxParticipants = parseInt(
+          participantsElement?.textContent.split(': ')[1]?.replace(/\D/g, '') || 0, 
+          10
+      );
+
+      // Aplicar filtros
+      const matchesSearch = eventName.includes(searchInput);
+      const matchesDate = !filterDate || convertedDate === filterDate;
+      const matchesTime = !filterTime || eventTime === filterTime;
+      const matchesParticipants = !filterParticipants || maxParticipants >= parseInt(filterParticipants, 10);
+
+      // Exibir/ocultar
+      card.style.display = (matchesSearch && matchesDate && matchesTime && matchesParticipants) 
+          ? 'block' 
+          : 'none';
+  });
 }
 
 // Função para fechar a janela de detalhes do evento

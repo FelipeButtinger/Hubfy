@@ -368,7 +368,8 @@ async function participantsQuantity(groupId){
         },
         body: JSON.stringify({ eventId: id }), // Corpo da requisição enviado como JSON
       });
-    console.log(document.getElementById("deleteButton").value)
+    
+    location.reload()
   }
   async function deleteUserEvent(eventIndex) {
     
