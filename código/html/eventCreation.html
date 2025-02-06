@@ -7,6 +7,26 @@
     <link rel="stylesheet" href="../css/eventCreation.css">
 </head>
 <body>
+    <header>
+        
+        <a href="../html/home.html"><img src="../src/logo.png" alt=""></a>
+    
+    <div id="rightSide">
+        <div class="links">
+            <img src="../src/adicionar.png" alt="">
+            <a href="../html/eventCreation.html">Criar Evento</a>
+        </div>
+        <div class="links">
+            <img src="../src/evento.png" alt="">
+            <a href="../html/user.html">Seus Eventos</a>
+        </div>
+        <div class="links">
+            <img src="../src/perfil.png" alt="">
+            <a id="link" href=''>Perfil</a>
+        </div>
+    </div>
+</header>
+<main>
     <div id="circuloBackGround"></div>
     
     <div class="container">
@@ -21,7 +41,6 @@
                         name="name" 
                         placeholder="Digite o nome do evento" 
                         required
-                        maxlength="30"
                         oninput="updatePreview()"
                     >
                 </div>
@@ -157,6 +176,8 @@
     </div>
 
     <div id="message"></div>
+</main>
+
 
     <script>
         function handleImagePreview(event) {

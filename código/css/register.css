@@ -46,31 +46,12 @@ main {
   margin-bottom: 2rem;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+.logo-container img {
+  width: 150px; /* Ajuste o tamanho da logo conforme necessário */
+  height: auto; /* Mantém a proporção da imagem */
+  margin-bottom: 1rem; /* Espaçamento abaixo da logo */
 }
 
-.logo-symbol {
-  width: 2rem;
-  height: 2rem;
-  background: linear-gradient(135deg, #6366f1, #3b82f6);
-  border-radius: 0.5rem;
-}
-
-.logo-text {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.logo-tagline {
-  font-size: 0.875rem;
-  color: #6b7280;
-}
 
 /* Profile upload styles */
 .profile-upload {

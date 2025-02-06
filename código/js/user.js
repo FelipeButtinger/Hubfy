@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (userResponse.ok) {
         userData = await userResponse.json(); // userData se mantém salvo
         console.log("seu id: ", userData.id);
-
+document.getElementById('link').href = `../html/userInfo.html?id=${userData.id}&name=${userData.name}`
         // Requisição para a rota /userEvents
         const eventsResponse = await fetch(`http://localhost:3000/userEvents?userId=${userData.id}`, {
             method: 'GET'
@@ -185,6 +185,7 @@ function entrarCardEvento(button){
     }
 }
 async function renderPastCard(index, organizerId) {
+    document.getElementById('rate').style.display = "flex";
     console.log("Índice recebido:", index);
     console.log("Evento encontrado:", pastEvents[index]);
 
@@ -244,6 +245,7 @@ async function renderPastCard(index, organizerId) {
     const organizerData = await userIdResponse.json();
     console.log("Organizador encontrado:", organizerData);
     const imageUrl = `http://localhost:3000/eventImage/${pastEvents[index].id}`;
+    const phoneNumber = pastEvents[index].phone_number.replace(/\D+/g, '').trim();
     // Atualizar o card com os dados
     document.getElementById("card").innerHTML = `
     <button onclick="closeCards()">fechar</button>
@@ -260,13 +262,14 @@ async function renderPastCard(index, organizerId) {
             <p><strong>Hora:</strong> ${pastEvents[index].event_time.slice(0, -3)}</p>
         </div>
         <p>Participantes: ${participantsData.participants}/${pastEvents[index].participants}</p>
-        <a href="https://api.whatsapp.com/send?phone=55${pastEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
+        <a href="<a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>
         <p><strong>Endereço:</strong> ${cepData.bairro} - ${cepData.localidade} - ${cepData.uf}</p>
     `;
 
     console.log("Card atualizado com sucesso!");
 }
 async function renderActiveCard(button) {
+    document.getElementById('rate').style.display = "none";
     const values = JSON.parse(button.value);
     const index = values[0];
     const organizerId = values[1];
@@ -282,15 +285,17 @@ async function renderActiveCard(button) {
     const imageUrl = `http://localhost:3000/eventImage/${activeEvents[index].id}`;
 
     let organizerName = "";
-    if (organizerId !== userData.id) {
-        const organizerData = await (await fetch(`http://localhost:3000/userId?id=${organizerId}`)).json();
-        organizerName = `<a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerData.name}</a>`;
-    }
+    
+    const organizerData = await (await fetch(`http://localhost:3000/userId?id=${organizerId}`)).json();
+    organizerName = `<a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerData.name}</a>`;
+    
+    const phoneNumber = activeEvents[index].phone_number.replace(/\D+/g, '').trim();
 
+    console.log(organizerData)
     document.getElementById(`card`).innerHTML = `
         <button onclick="closeCards()">fechar</button>
         <h3 id="activeName0">${activeEvents[index].name}</h3>
-        <img style="width:80%;" src="${imageUrl}" alt="Sua Foto">
+        <img style="width:70%;" src="${imageUrl}" alt="Sua Foto"></img>
         <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" id="description" name="description" maxlength="500">${activeEvents[index].description}</textarea>
         ${organizerName}
         <p>${activeEvents[index].event_type}</p>
@@ -299,7 +304,7 @@ async function renderActiveCard(button) {
             <p><strong>Hora:</strong> ${activeEvents[index].event_time.slice(0, -3)}</p>
         </div>
         <p>Participantes: ${participantsData.participants}/${activeEvents[index].participants}</p>
-        <a href="https://api.whatsapp.com/send?phone=55${activeEvents[index].phone_number.replace(/[()]/g, "").trim()}">Entrar em contato</a>
+        <a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>
         <p><strong>Endereço:</strong> ${cepData.bairro} - ${cepData.localidade} - ${cepData.uf}</p>
         ${organizerId === userData.id ? `
             <button onclick="redirect(${activeEvents[index].id})">Editar</button>
@@ -407,7 +412,7 @@ const participantsResponse = await fetch(`http://localhost:3000/participantsInfo
 }
   
 async function fillHonorCards(participants){
-    document.querySelectorAll('.honorCard').forEach(div => div.remove());
+    document.querySelectorAll('.honorBlock').forEach(div => div.remove());
     honorParticipants = participants;
     for(let i = 0;i<participants.length;i++){
         if(participants[i].id == userData.id){
@@ -417,6 +422,8 @@ async function fillHonorCards(participants){
             method: 'GET'
         });
 
+        
+        
         honorData = await allHonorResponse.json();
         if(honorData.leadership_honors==null){
             honorData.leadership_honors = 0
@@ -428,10 +435,11 @@ async function fillHonorCards(participants){
             honorData.participative_honors = 0
         }
         const div = document.createElement('div');
-        div.classList.add('honorCard');
+        div.classList.add('honorBlock');
         div.id = `honorCard${i}`
         div.innerHTML = `
-            <h3>${participants[i].name}</h3>
+        <a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${participants[i].id}&name=${participants[i].name}">${participants[i].name}</a>
+        <div class ='honorCard'>
             
             <div class="honorImages"> 
             <button onclick="changeHonor(${participants[i].id},'leadership')"><img src="../src/lider.png" title="Liderança"></button>
@@ -445,6 +453,7 @@ async function fillHonorCards(participants){
                <button onclick="changeHonor(${participants[i].id},'participative')"><img src="../src/participativo.png" title="Participativo"></button>
             </div>
              <h2>${honorData.participative_honors}</h2>
+             </div>
         `;
         
         document.getElementById("participantsHonor").appendChild(div); 
@@ -546,21 +555,7 @@ async function rate(button){
     fillHonorCards(honorParticipants)
 
 }
-async function fetchUserImage(userId) {
-    try {
-        const response = await fetch(`http://localhost:3000/userImage/${userId}`);
-        if (response.ok) {
-            const blob = await response.blob();
-            return URL.createObjectURL(blob); // Retorna a URL gerada
-        } else {
-            console.error('Erro ao buscar a imagem:', response.statusText);
-            return "../src/defaultUser.png"; // Imagem padrão caso ocorra erro
-        }
-    } catch (error) {
-        console.error('Erro ao buscar a imagem:', error);
-        return "../src/sociavel.png"; // Imagem padrão em caso de erro
-    }
-}
+
 function closeCards(){
     location.reload();
 }

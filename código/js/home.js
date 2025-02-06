@@ -2,6 +2,7 @@ let selectedEvent = 0; // Variável global para armazenar o ID do evento selecio
 let userData = {}; // Variável global para armazenar os dados do usuário logado
 
 document.addEventListener('DOMContentLoaded', async () => {
+  
   let eventIds = [];
   const token = localStorage.getItem('token');
 
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (userResponse.ok) {
     userData = await userResponse.json();
     console.log('Dados do usuário:', userData);
+    document.getElementById('link').href = `../html/userInfo.html?id=${userData.id}&name=${userData.name}`
   } else {
     messageElement.textContent = 'Erro ao obter dados do usuário.';
     return;
@@ -233,7 +235,7 @@ function filterEventsAndGroups() {
       const matchesSearch = eventName.includes(searchInput);
       const matchesDate = !filterDate || convertedDate === filterDate;
       const matchesTime = !filterTime || eventTime === filterTime;
-      const matchesParticipants = !filterParticipants || maxParticipants >= parseInt(filterParticipants, 10);
+      const matchesParticipants = !filterParticipants || maxParticipants <= parseInt(filterParticipants, 10); // Corrigido para <=
 
       // Exibir/ocultar
       card.style.display = (matchesSearch && matchesDate && matchesTime && matchesParticipants) 

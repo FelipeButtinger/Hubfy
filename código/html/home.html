@@ -8,28 +8,38 @@
 </head>
 <body>
     <header>
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-symbol"></div>
-                <h1>hubfy</h1>
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Pesquisar eventos ou grupos..." oninput="filterEventsAndGroups()">
-                
-                    <!-- Novos inputs para filtros -->
-                    <input type="date" id="filterDate" onchange="filterEventsAndGroups()">
-                    <input type="time" id="filterTime" onchange="filterEventsAndGroups()">
-                    <input type="number" id="filterParticipants" placeholder="Nº máximo de participantes" min="0" oninput="filterEventsAndGroups()">
-                </div>
+        
+            <a href="../html/home.html"><img src="../src/logo.png" alt=""></a>
+        
+        <div id="rightHeaderSide">
+            <div class="links">
+                <img src="../src/adicionar.png" alt="">
+                <a href="../html/eventCreation.html">Criar Evento</a>
             </div>
-            <nav>
-                <a href="../html/eventCreation.html" class="nav-button create-button">Criar Evento</a>
-                <a href="../html/user.html" class="nav-button user-button">Página do usuário</a>
-            </nav>
+            <div class="links">
+                <img src="../src/evento.png" alt="">
+                <a href="../html/user.html">Seus Eventos</a>
+            </div>
+            <div class="links">
+                <img src="../src/perfil.png" alt="">
+                <a id="link" href=''>Perfil</a>
+            </div>
         </div>
     </header>
 
     
-
+    <div id="filter">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Pesquisar eventos" oninput="filterEventsAndGroups()">
+            
+                <div >
+                    <input type="date" id="filterDate" onchange="filterEventsAndGroups()">
+                    <input type="time" id="filterTime" onchange="filterEventsAndGroups()">
+                    <input type="number" id="filterParticipants" placeholder="Nº máximo de participantes" min="0" oninput="filterEventsAndGroups()">
+                </div>
+        </div>
+        
+    </div>
     <!-- Modal para detalhar evento -->
     <div id="joinEventLock">
         <div id="joinEvent">

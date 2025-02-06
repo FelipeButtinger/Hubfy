@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const userData = await userResponse.json(); // Dados do usuário logado
-
+    document.getElementById('link').href = `../html/userInfo.html?id=${userData.id}&name=${userData.name}`
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('eventId');
     const form = document.getElementById('eventRegisterForm');
