@@ -375,31 +375,30 @@ app.delete('/event', (req, res) => {
     res.send('evento deletado com sucesso');
   });
 });
-app.put('/editUser', authenticateToken, upload.single('profile_photo'), async (req, res) => {
+app.put('/editUser', authenticateToken, upload.single('profilePhoto'), async (req, res) => {
   const { newName, newAge, newContactInfo, newPassword, userId } = req.body;
   const profilePhotoBuffer = req.file ? req.file.buffer : null;
   const newHhashedPassword = await bcrypt.hash(newPassword, 10); // Criptografa a senha
-  // Monta a query e os valores dinamicamente
+
   let query = 'UPDATE users SET name = ?, age = ?, contact_info = ?, password = ?';
   let values = [newName, newAge, newContactInfo, newHhashedPassword];
-  
+
   if (profilePhotoBuffer) {
-    query += ', profile_photo = ?';
-    values.push(profilePhotoBuffer);
+      query += ', profile_photo = ?';
+      values.push(profilePhotoBuffer);
   }
-  
+
   query += ' WHERE id = ?';
   values.push(userId);
 
-  // Executa a query
   db.query(query, values, (err, result) => {
-    if (err) throw err;
+      if (err) throw err;
 
-    if (result.affectedRows === 0) {
-      return res.status(404).send('Usuário não encontrado');
-    }
+      if (result.affectedRows === 0) {
+          return res.status(404).send('Usuário não encontrado');
+      }
 
-    res.send('Usuário atualizado com sucesso');
+      res.send('Usuário atualizado com sucesso');
   });
 });
 app.delete('/user', (req, res) => {

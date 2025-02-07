@@ -233,7 +233,16 @@ async function entrarCardEvento(button) {
 
       // Remove todos os caracteres não numéricos e espaços do número de telefone
       const phoneNumber = eventData.phone_number.replace(/\D+/g, '').trim();
-
+      if(eventData.organizer_id == userData.id){
+        document.getElementById('contact').style.display = 'none'
+        document.getElementById('userEvent').style.display = 'none'
+      }
+      else{
+        document.getElementById('contact').style.display = 'flex'
+        document.getElementById('userEvent').style.display = 'flex'
+      }
+      organizerData = await fetchOrganizerData(eventData.organizer_id)
+      
       // Exibe os detalhes do evento
       document.getElementById('preencher').textContent = eventData.name; // Nome do evento
       document.getElementById('description').textContent = eventData.description; // Descrição do evento
@@ -243,6 +252,8 @@ async function entrarCardEvento(button) {
       document.getElementById('dataHora').textContent = `Data: ${partes[2]}/${partes[1]}/${partes[0]} - Hora: ${eventData.event_time.slice(0, -3)}`;
       document.getElementById('local').textContent = `Local: ${cepData.bairro}, ${cepData.localidade} - ${cepData.uf}`;
       document.getElementById('contact').href = `https://api.whatsapp.com/send?phone=55${phoneNumber}`;
+      document.getElementById('organizerProfile').href = `../html/userInfo.html?id=${eventData.organizer_id}&name=${organizerData.name}`;
+      document.getElementById('organizerProfile').text = `${organizerData.name}`;
       document.getElementById('participants').textContent = `Participantes: ${participantsData.participants}/${eventData.participants}`;
       document.getElementById('userEvent').value = selectedEvent;
   } catch (error) {
@@ -352,4 +363,14 @@ async function participantsInfo(groupId) {
   participantsData = await participantsResponse.json();
 
   return participantsData;
+}
+async function fetchOrganizerData(organizerId){
+  const userIdResponse = await fetch(
+    `http://localhost:3000/userId?id=${organizerId}`
+  );
+  if (!userIdResponse.ok) {
+    throw new Error(`Erro ao buscar organizador: ${userIdResponse.statusText}`);
+  }
+  const organizerData = await userIdResponse.json();
+  return organizerData
 }

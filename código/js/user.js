@@ -220,10 +220,14 @@ async function renderPastCard(index, organizerId) {
     console.error(`Erro: Não existe pastEvents[${index}]`);
     return;
   }
-
+  const phoneNumber = pastEvents[index].phone_number.replace(/\D+/g, "").trim();
+  let phoneLink = '';
+  let organizerName = 'você'
   // Exibir elementos corretos
   if (organizerId != userData.id) {
-    let exists = false;
+    let exists = false;//remover
+    phoneLink = `<a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>`
+    organizerName = organizerData.name
     document.getElementById("rateOrganizer").style.display = "flex";
     document.getElementById("stars").value = organizerId;
     const ratingsResponse = await fetch(
@@ -231,8 +235,9 @@ async function renderPastCard(index, organizerId) {
       {
         method: "GET",
       }
+      
     );
-
+   
     let ratingsResult = await ratingsResponse.json();
     for (let i = 0; i < ratingsResult.ratings.length; i++) {
       if (ratingsResult.ratings[i].rating_user_id != userData.id) {
@@ -277,7 +282,7 @@ async function renderPastCard(index, organizerId) {
   const organizerData = await userIdResponse.json();
   console.log("Organizador encontrado:", organizerData);
   const imageUrl = `http://localhost:3000/eventImage/${pastEvents[index].id}`;
-  const phoneNumber = pastEvents[index].phone_number.replace(/\D+/g, "").trim();
+  
   // Atualizar o card com os dados
   document.getElementById("card").innerHTML = `
     <button onclick="closeCards()">fechar</button>
@@ -291,7 +296,7 @@ async function renderPastCard(index, organizerId) {
                   }</textarea>
                   <a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${
                     organizerData.id
-                  }&name=${organizerData.name}">${organizerData.name}</a>
+                  }&name=${organizerData.name}">${organizerName}</a>
         <p>${pastEvents[index].event_type}</p>
         <div class="divide">
             <p><strong>Data:</strong> ${partes[2]}/${partes[1]}/${partes[0]}</p>
@@ -303,7 +308,7 @@ async function renderPastCard(index, organizerId) {
         <p>Participantes: ${participantsData.participants}/${
     pastEvents[index].participants
   }</p>
-        <a href="<a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>
+        ${phoneLink}
         <p><strong>Endereço:</strong> ${cepData.bairro} - ${
     cepData.localidade
   } - ${cepData.uf}</p>
@@ -327,17 +332,24 @@ async function renderActiveCard(button) {
   const data = activeEvents[index].event_date.split("T")[0];
   const imageUrl = `http://localhost:3000/eventImage/${activeEvents[index].id}`;
 
-  let organizerName = "";
+  let organizerName = "você";
 
   const organizerData = await (
     await fetch(`http://localhost:3000/userId?id=${organizerId}`)
   ).json();
-  organizerName = `<a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerData.name}</a>`;
+  
 
   const phoneNumber = activeEvents[index].phone_number
     .replace(/\D+/g, "")
     .trim();
-
+ 
+    let phoneLink = '';
+    
+    if(organizerId != userData.id){
+      phoneLink = `<a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>`
+      organizerName = organizerData.name
+    }
+  
   console.log(organizerData);
   document.getElementById(`card`).innerHTML = `
         <button onclick="closeCards()">fechar</button>
@@ -346,7 +358,7 @@ async function renderActiveCard(button) {
         <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" id="description" name="description" maxlength="500">${
           activeEvents[index].description
         }</textarea>
-        ${organizerName}
+        <a style="color: black; font-size:2rem" href="../html/userInfo.html?id=${organizerData.id}&name=${organizerData.name}">${organizerName}</a>
         <p>${activeEvents[index].event_type}</p>
         <div class="divide">
             <p><strong>Data:</strong> ${data.split("-").reverse().join("/")}</p>
@@ -358,7 +370,7 @@ async function renderActiveCard(button) {
         <p>Participantes: ${participantsData.participants}/${
     activeEvents[index].participants
   }</p>
-        <a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>
+        ${phoneLink}
         <p><strong>Endereço:</strong> ${cepData.bairro} - ${
     cepData.localidade
   } - ${cepData.uf}</p>

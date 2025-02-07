@@ -255,6 +255,11 @@ main {
     background: rgba(0, 0, 0, 0.5); /* Aplica um fundo semitransparente escuro ao modal */
     z-index: 100; /* Define a camada do modal, colocando-o acima dos outros elementos */
 }
+#organizerProfile{
+    font-size: 3rem;
+    color: black;
+    
+}
 
 /* Estilo do conteúdo do modal */
 #joinEvent {
