@@ -227,7 +227,7 @@ async function renderPastCard(index, organizerId) {
   if (organizerId != userData.id) {
     let exists = false;//remover
     phoneLink = `<a href="https://api.whatsapp.com/send?phone=55${phoneNumber}">Entrar em contato</a>`
-    organizerName = organizerData.name
+    
     document.getElementById("rateOrganizer").style.display = "flex";
     document.getElementById("stars").value = organizerId;
     const ratingsResponse = await fetch(
@@ -279,17 +279,16 @@ async function renderPastCard(index, organizerId) {
   if (!userIdResponse.ok) {
     throw new Error(`Erro ao buscar organizador: ${userIdResponse.statusText}`);
   }
+  
   const organizerData = await userIdResponse.json();
   console.log("Organizador encontrado:", organizerData);
   const imageUrl = `http://localhost:3000/eventImage/${pastEvents[index].id}`;
-  
+  organizerName = organizerData.name
   // Atualizar o card com os dados
   document.getElementById("card").innerHTML = `
     <button onclick="closeCards()">fechar</button>
         <h3>${pastEvents[index].name}</h3>
         <img style="width:80%;" src="${imageUrl}" alt="Sua Foto">
-        
-            
             <textarea readonly style="resize: none;width: 90%;height:15%;display:flex" 
                   id="description" name="description" required maxlength="500">${
                     pastEvents[index].description
