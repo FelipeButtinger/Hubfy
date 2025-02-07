@@ -43,6 +43,9 @@ async function receiveHonors(){
     document.getElementById("sociable").textContent = honorData.sociable_honors;
     document.getElementById("participative").textContent = honorData.participative_honors;
     
+    if(thisId == userData.id){
+        showButtons()
+    }
 }
 async function receiveRatings(){
     const ratingsResponse = await fetch(`http://localhost:3000/getRatings?userId=${thisId}`, {
@@ -130,4 +133,16 @@ async function fetchUserImage(userId) {
         console.error('Erro ao buscar a imagem:', error);
         return "../src/sociavel.png"; // Imagem padrão em caso de erro
     }
+}
+function showButtons(){
+    document.getElementById('crudButtons').style.display = 'flex'
+    
+   
+}
+function leaveAccount(){
+    localStorage.removeItem("token");
+    window.location.href = 'login.html';  
+}
+function editAccount(){
+    window.location.href = `../html/register.html?id=${userData.id}`;
 }

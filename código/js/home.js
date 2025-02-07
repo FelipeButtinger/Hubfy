@@ -125,10 +125,61 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Função para entrar em um evento
+// Função para entrar em um evento
 async function entrarEvento() {
   const eventId = document.getElementById('userEvent').value;
   const participantId = userData.id;
 
+  // Obtém os eventos ativos do usuário
+  const userActiveEvents = await getUserEvents();
+
+  // Obtém os dados do evento selecionado
+  const eventResponse = await fetch(`http://localhost:3000/eventId?id=${selectedEvent}`);
+  if (!eventResponse.ok) {
+    throw new Error(`Erro: ${eventResponse.statusText}`);
+  }
+  const eventData = await eventResponse.json();
+
+  // Obtém os participantes do evento
+  const participantsData = await participantsInfo(selectedEvent);
+console.log(participantsData.result.length)
+  // Verifica se o usuário já está cadastrado no evento
+  let isUserAlreadyRegistered = false;
+  for (let index = 0; index < participantsData.result.length; index++) {
+    if (participantsData.result[index].id == userData.id) {
+      
+      isUserAlreadyRegistered = true;
+      break;
+    }
+  }
+
+  if (isUserAlreadyRegistered) {
+    alert("Você já está cadastrado neste evento.");
+    setTimeout(function() {
+      window.location.href = 'home.html'; 
+    }, 1000);
+    return
+  }
+
+  // Verifica se o usuário é o organizador do evento
+  if (eventData.organizer_id === userData.id) {
+    alert("Você não pode entrar em um evento que criou.");
+    setTimeout(function() {
+      window.location.href = 'home.html'; 
+    }, 1000);
+    return
+  }
+
+  // Verifica se o usuário atingiu o limite de eventos ativos
+  if (userActiveEvents.length >= 3) {
+    alert("Você atingiu o limite de 3 eventos ativos ao mesmo tempo. Saia de um para criar ou entrar em um novo.");
+    setTimeout(function() {
+      window.location.href = 'home.html'; 
+    }, 1000);
+    return
+  }
+
+  // Tenta inscrever o usuário no evento
   try {
     const response = await fetch('http://localhost:3000/participantsRegister', {
       method: 'POST',
@@ -138,7 +189,7 @@ async function entrarEvento() {
 
     if (response.ok) {
       alert('Inscrição realizada com sucesso!');
-      location.reload();
+      window.location.href = 'home.html'; 
     } else {
       const errorMessage = await response.text();
       alert(`Erro: ${errorMessage}`);
@@ -198,6 +249,8 @@ async function entrarCardEvento(button) {
       console.error(`Erro ao buscar os dados do evento ${selectedEvent}:`, error.message);
   }
 }
+
+// Coleta todas as infos dos campos do home "Buscas"
 function filterEventsAndGroups() {
   const searchInput = document.getElementById('searchInput').value.toLowerCase();
   const filterDate = document.getElementById('filterDate').value;
@@ -247,4 +300,56 @@ function filterEventsAndGroups() {
 // Função para fechar a janela de detalhes do evento
 function fecharEvento() {
   document.getElementById('joinEventLock').style.display = 'none';
+}
+async function getUserEvents(){
+  let activeEvents = []
+  const eventsResponse = await fetch(
+    `http://localhost:3000/userEvents?userId=${userData.id}`,
+    {
+      method: "GET",
+    }
+  );
+
+  if (eventsResponse.ok) {
+    const eventsData = await eventsResponse.json();
+    const now = new Date();
+
+    for (const event of eventsData.allEvents) {
+      //separa os eventos em duas arrays, uma para eventos ativos e uma para eventos que já aconteceram
+      const eventDate = new Date(event.event_date); // Apenas a data
+      const eventTime = event.event_time; // Horário no formato "HH:mm:ss"
+
+      if (isNaN(eventDate.getTime())) {
+        console.warn("Data inválida encontrada:", event.event_date);
+        continue; // Ignorar eventos com datas inválidas
+      }
+
+      // Dividir o tempo em horas, minutos e segundos para montar a data completa
+      const [hours, minutes, seconds] = eventTime.split(":").map(Number);
+      eventDate.setHours(hours, minutes, seconds); // Adiciona o horário à data
+
+      console.log("Data e hora do evento (convertida):", eventDate);
+
+      if (eventDate < now) {
+        
+      } else {
+        activeEvents.push(event); // Evento ainda ativo
+      }
+    }
+    
+  } else {
+    console.error("Erro ao buscar eventos do usuário.");
+  }
+  return activeEvents
+}
+async function participantsInfo(groupId) {
+  const participantsResponse = await fetch(
+    `http://localhost:3000/participantsInfo?groupId=${groupId}`
+  );
+  if (!participantsResponse.ok) {
+    throw new Error(`Erro: ${participantsResponse.statusText}`);
+  }
+  participantsData = await participantsResponse.json();
+
+  return participantsData;
 }

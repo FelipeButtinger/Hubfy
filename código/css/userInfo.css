@@ -171,7 +171,21 @@ main {
 .honorImg:hover {
     transform: scale(1.1);
 }
-
+#crudButtons {
+    display: none;
+    justify-content: space-around;
+    margin-bottom: 10px;
+}
+#crudButtons button{
+    border-style: none;
+    background: none;
+    height: 50px;
+    width: 100px;
+    cursor: pointer;
+}
+#crudButtons img{
+    height: 100%;
+}
 /* Comments Section */
 #comments {
     display: flex;

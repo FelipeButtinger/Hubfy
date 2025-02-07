@@ -1,4 +1,4 @@
-let activeEvents;
+let activeEvents = []
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -61,11 +61,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
       console.error(error);
     }
+    
+  }
+
+  const eventsResponse = await fetch(
+    `http://localhost:3000/userEvents?userId=${userData.id}`,
+    {
+      method: "GET",
+    }
+  );
+
+  if (eventsResponse.ok) {
+    const eventsData = await eventsResponse.json();
+    const now = new Date();
+
+    for (const event of eventsData.allEvents) {
+      //separa os eventos em duas arrays, uma para eventos ativos e uma para eventos que já aconteceram
+      const eventDate = new Date(event.event_date); // Apenas a data
+      const eventTime = event.event_time; // Horário no formato "HH:mm:ss"
+
+      if (isNaN(eventDate.getTime())) {
+        console.warn("Data inválida encontrada:", event.event_date);
+        continue; // Ignorar eventos com datas inválidas
+      }
+
+      // Dividir o tempo em horas, minutos e segundos para montar a data completa
+      const [hours, minutes, seconds] = eventTime.split(":").map(Number);
+      eventDate.setHours(hours, minutes, seconds); // Adiciona o horário à data
+
+      console.log("Data e hora do evento (convertida):", eventDate);
+
+      if (eventDate < now) {
+        
+      } else {
+        activeEvents.push(event); // Evento ainda ativo
+      }
+    }
+    
+  } else {
+    console.error("Erro ao buscar eventos do usuário.");
   }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
+    if(!isEditing && activeEvents.length >=3){
+      alert("Você atigiu o limite de 3 eventos ativos ao mesmo tempo, saia de um para criar ou entrar em um novo")
+      setTimeout(function() {
+        window.location.href = 'home.html'; 
+        
+      }, 3000);
+    }else{
     const name = document.getElementById("name").value;
     const description = document.getElementById("description").value;
     const event_type = document.getElementById("event_type").value;
@@ -128,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       messageElement.textContent = "Erro ao processar a requisição.";
       console.error(error);
     }
-  });
+}});
 
   document.getElementById("event_date").addEventListener("input", function () {
     const today = new Date().toISOString().split("T")[0];

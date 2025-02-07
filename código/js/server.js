@@ -24,7 +24,7 @@ app.use(bodyParser.json()); // Middleware para processar o corpo das requisiçõ
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root', // Ajuste conforme necessário
-  password: 'root', // Insira a senha se aplicável
+  password: '', // Insira a senha se aplicável
   database: 'project' // Nome do banco de dados
 });
 
@@ -375,6 +375,45 @@ app.delete('/event', (req, res) => {
     res.send('evento deletado com sucesso');
   });
 });
+app.put('/editUser', authenticateToken, upload.single('profile_photo'), async (req, res) => {
+  const { newName, newAge, newContactInfo, newPassword, userId } = req.body;
+  const profilePhotoBuffer = req.file ? req.file.buffer : null;
+  const newHhashedPassword = await bcrypt.hash(newPassword, 10); // Criptografa a senha
+  // Monta a query e os valores dinamicamente
+  let query = 'UPDATE users SET name = ?, age = ?, contact_info = ?, password = ?';
+  let values = [newName, newAge, newContactInfo, newHhashedPassword];
+  
+  if (profilePhotoBuffer) {
+    query += ', profile_photo = ?';
+    values.push(profilePhotoBuffer);
+  }
+  
+  query += ' WHERE id = ?';
+  values.push(userId);
+
+  // Executa a query
+  db.query(query, values, (err, result) => {
+    if (err) throw err;
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Usuário não encontrado');
+    }
+
+    res.send('Usuário atualizado com sucesso');
+  });
+});
+app.delete('/user', (req, res) => {
+  const { userId } = req.body;
+  db.query('DELETE FROM users WHERE id = ?', [userId], (err, result) => {
+    if (err) throw err;
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Usuário não encontrado');
+    }
+
+    res.send('Usuário deletado com sucesso');
+  });
+});
 app.get('/honorInfo', (req, res) => {
   const { id } = req.query;
 
@@ -404,6 +443,7 @@ app.get('/honorInfo', (req, res) => {
     res.json(results[0]);
   });
 });
+
 app.post('/addHonor', (req, res) => {
   const { fromUserId, toUserId, honorType } = req.body;
 
