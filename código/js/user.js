@@ -1,8 +1,12 @@
-let activeEvents = [];
+let activeEvents = [];//as duas arrays para eventos ativos e passados
 let pastEvents = [];
+
 let userData = 0;
-let page = 1;
+let page = 1;//página atual do sistema de paginação dos eventos passados, iniciada em 1 e depois alterna por meio da function renderCards.
+
 let honorParticipants = [];
+/*Captura o Usuário logado para então requisitar os eventos em que ele está cadastrado, distribui então entre eventos ativos e passados.
+*/
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -67,6 +71,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderCards(0);
 }); //fim do DOMContentLoaded
 
+/*preenche todos os cards ativos e passados com as informações, como a quantidade de eventos passados é ilimitada, determina páginas para eventos passados, mostrando 6 por vez
+então por meio dos botões "back" e "next" faz a navegação entra as páginas, enquanto trabalha desabilitando e habilitando estes botões em casos específicos.*/
 async function renderCards(action) {
   //preenche todos os cards com os eventos referentes.
   let pageQuantity = pastEvents.length / 6; //calcula a quantidade de páginas que os eventos que já aconteceram vão ocupar, mostra 6 eventos por vez.
@@ -192,7 +198,7 @@ async function renderCards(action) {
   } //Determina o número total de página para preencher o contador de páginas da página
   document.getElementById("pageNumber").textContent = `${page}/${pageQuantity}`; //altea a página atual no visual.
 }
-
+//ativa quando o botão "ver" de algum card é selecionado, então direciona decidindo se foi o de um evento ativo ou passado.
 function entrarCardEvento(button) {
   //Direciona para eventos ativos ou passados quando os detalhes de um card forem abertos.
   const values = JSON.parse(button.value); // Converte a string JSON de volta para array
@@ -211,6 +217,9 @@ function entrarCardEvento(button) {
     renderPastCard(index, values[1]); // Passa o índice correto e o organizer_id
   }
 }
+/*Recebe o id do evento selecionado para ser visualizado, assim como o id do seu organizador para comparar e fazer requisições
+dependendo se o User logado for o organizador deste evento, esconde algumas funcionalidades enquanto mostra outras.
+*/
 async function renderPastCard(index, organizerId) {
   document.getElementById("rate").style.display = "flex";
   console.log("Índice recebido:", index);
@@ -315,6 +324,8 @@ async function renderPastCard(index, organizerId) {
 
   console.log("Card atualizado com sucesso!");
 }
+/*Recebe o id do evento selecionado para ser visualizado e preenche o card de visualização com os dados dele
+Dependendo se o User logado é o dono do evento, esconde algumas funcionalidades enquanto mostra outras*/
 async function renderActiveCard(button) {
   document.getElementById("rate").style.display = "none";
   const values = JSON.parse(button.value);
@@ -384,6 +395,7 @@ async function renderActiveCard(button) {
     `;
 }
 
+// Função para buscar dados do CEP
 async function cepSearch(cep) {
   const cepResponse = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
   if (!cepResponse.ok) {
@@ -393,6 +405,7 @@ async function cepSearch(cep) {
   return cepData;
 }
 
+// Função para buscar a quantidade de participantes de um evento
 async function participantsQuantity(groupId) {
   const participantsResponse = await fetch(
     `http://localhost:3000/participants?groupId=${groupId}`
@@ -401,7 +414,6 @@ async function participantsQuantity(groupId) {
     throw new Error(`Erro: ${participantsResponse.statusText}`);
   }
   participantsData = await participantsResponse.json();
-
   return participantsData;
 }
 
