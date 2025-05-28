@@ -21,3 +21,6 @@ Antes de colocar nosso banco de dados.
 
 
 ![logo](https://github.com/user-attachments/assets/85c2249c-1440-4b3f-8271-c3ef45749791)
+
+link para teste:
+https://hubfy-deploy.onrender.com
