@@ -12,9 +12,9 @@ Desenvolvemos este projeto utilizando **HTML, CSS e JavaScript**, além do banco
 - **CRUD**: O sistema segue a metodologia **CRUD (Criar, Ler, Atualizar e Deletar)**, permitindo que os usuários cadastrem, editem e excluam eventos e perfis.  
 
 ## Tutorial para usar o Hubfy:  
-O Hubfy não foi implantado online, então você precisará seguir alguns passos para utilizá-lo localmente.  
 
-Necessario ter o node.js para conseguir rodar o servidor e criar um banco de dados chamado project a e não esqueça de dar o use project; 
+
+Caso deseje testar localmente, antes é necessario ter o node.js para conseguir rodar o servidor e criar um banco de dados chamado project a e não esqueça de dar o use project; 
 Antes de colocar nosso banco de dados.
 
 ![image]
